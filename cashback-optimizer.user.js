@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Cashback-Optimizer Suite
 // @namespace    http://tampermonkey.net/
-// @version      4.04
+// @version      4.05
 // @description  Shop-Popup mit automatischer Verlinkung.
 // @author       ruler
 // @match        *://*/*
@@ -75,14 +75,14 @@
         "Gutscheingold Beauty": "https://www.gutscheingold.de/beauty/#einloesepartner",
         "Gutscheingold Beauty": "https://www.gutscheingold.de/beauty/#einloesepartner",
         "Gutscheingold": "https://www.gutscheingold.de/grusskarten/#einloesepartner",
-          "Gutscheingold Kids": "https://www.gutscheingold.de/kids/#einloesepartner",
-         "Gutscheingold Fashion": "https://www.gutscheingold.de/fashion/#einloesepartner",
-             "Gutscheingold Home": "https://www.gutscheingold.de/home/#einloesepartner",
+        "Gutscheingold Kids": "https://www.gutscheingold.de/kids/#einloesepartner",
+        "Gutscheingold Fashion": "https://www.gutscheingold.de/fashion/#einloesepartner",
+        "Gutscheingold Home": "https://www.gutscheingold.de/home/#einloesepartner",
         "Gutscheingold Entertainment": "https://www.gutscheingold.de/entertainment/#einloesepartner",
-                "Wunschgutschein": "https://www.wunschgutschein.de/pages/beliebtesten-einloesepartner",
-       "Wunschgutschein Home & Living": "https://www.wunschgutschein.de/products/home-living-gutschein",
-      "Wunschgutschein Mobilität": "https://www.wunschgutschein.de/products/tankgutschein", 
-      "Wunschgutschein Kids & Fun": "https://www.wunschgutschein.de/products/kids-gutschein"
+        "Wunschgutschein": "https://www.wunschgutschein.de/pages/beliebtesten-einloesepartner",
+        "Wunschgutschein Home & Living": "https://www.wunschgutschein.de/products/home-living-gutschein",
+        "Wunschgutschein Mobilität": "https://www.wunschgutschein.de/products/tankgutschein", 
+        "Wunschgutschein Kids & Fun": "https://www.wunschgutschein.de/products/kids-gutschein"
     
     };
 
@@ -90,7 +90,7 @@
         "Shoop": "shoop.de", "Shopbuddies": "shopbuddies.de", "Bestshopping": "bestshopping.com",
         "mycashbacks": "mycashbacks.com", "Wondercashback": "wondercashback.de", "Shopback": "shopback.de",
         "iGraal": "de.igraal.com", "Opera Cashback": "cashback.opera.com", "TopCashback": "topcashback.de",
-        "Shopmate": "shopmate.eu", "WEB.Cent": "vorteilswelt.web.de", "DeutschlandCard": "deutschlandcard.de",
+        "Shopmate": "shopmate.eu", "WEB.Cent": "vorteile.web.de", "DeutschlandCard": "deutschlandcard.de",
         "Budgey": "budgey.de", "Geschenkkartenwelt.de": "geschenkkartenwelt.de",
         "Unidays": "myunidays.com", "Studentbeans": "studentbeans.com", "BSW": "bsw.de", "Zave.it": "zave.it",
         "Hanseatic Vorteilswelt": "vorteilswelt.hanseaticbank.de",
