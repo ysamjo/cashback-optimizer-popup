@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Cashback-Optimizer Suite
 // @namespace    http://tampermonkey.net/
-// @version      4.06
+// @version      4.07
 // @description  Shop-Popup mit automatischer Verlinkung.
 // @author       ruler
 // @match        *://*/*
@@ -18,7 +18,8 @@
     // ==========================================
     // 1. GEMEINSAME KONFIGURATION & LINKS
     // ==========================================
-    const OPTIMIZER_DOMAIN = "cashback-optimizer.de";
+    const MAIN_DOMAIN = "cashback-optimizer.de";
+    const GITLAB_DOMAIN = "kolateeprojects.gitlab.io/cashback_optimizer";
     const ICON_URL = "https://cashback-optimizer.de/favicons/favicon.svg";
 
     const directLinks = {
@@ -38,14 +39,12 @@
         "Dealwise": "https://banking.ing.de/app/da_dealwise",
         "benefitforme": "https://benefits.me/",
         "O2 Priority": "https://www.o2online.de/priority/vorteile/priority-vorteilswelt",
-   "Klarna": "https://www.klarna.com/de/store/",
-       "Netto Kartenwelt": "https://www.netto-online.de/geschenk-gutscheinkarten/", 
+        "Klarna": "https://www.klarna.com/de/store/",
+        "Netto Kartenwelt": "https://www.netto-online.de/geschenk-gutscheinkarten/", 
         "Marktkauf Kartenwelt": "https://www.marktkauf.de/geschenk-gutscheinkarten/kat-M0740", 
         "Hanseatic Vorteilswelt": "https://meine.hanseaticbank.de/?redirect=voucherPortal",
-         "MeinMagenta": "https://www.telekom.de/magenta-moments",
+        "MeinMagenta": "https://www.telekom.de/magenta-moments",
         "Samsung Members": "https://www.samsung.com/de/apps/samsung-members/"
-        
-        
     };
 
     const bcLinks = {
@@ -63,33 +62,18 @@
         "BestChoice Home & Office": "https://home-office-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Kids & Play": "https://kids-play-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Sport & Hobby": "https://sport-hobby-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
-        "BestChoice Streaming & Entertainment": "https://streaming-entertainment-catalog.cadooz.com",
         "BestChoice Tech & Media": "https://tech-media-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Travel & Adventure": "https://travel-adventure-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
-        "BestChoice Charity & Giving": "https://charity-giving-catalog.cadooz.com",
-        "BestChoice Europe": "https://europe-catalog.cadooz.com",
-        "BestChoice Europe Premium": "https://europe-premium-catalog.cadooz.com",
-        "BestChoice Product": "https://product-catalog.cadooz.com",
-        "BestChoice Classic CH": "https://bestchoice-classic-ch-catalog.cadooz.com",
-        "BestChoice Classic AT": "https://bestchoice-classic-at-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&locale=default&sortBy=alpha&ptg=vou",
-        "Gutscheingold Beauty": "https://www.gutscheingold.de/beauty/#einloesepartner",
-        "Gutscheingold Beauty": "https://www.gutscheingold.de/beauty/#einloesepartner",
-        "Gutscheingold": "https://www.gutscheingold.de/grusskarten/#einloesepartner",
-        "Gutscheingold Kids": "https://www.gutscheingold.de/kids/#einloesepartner",
-        "Gutscheingold Fashion": "https://www.gutscheingold.de/fashion/#einloesepartner",
-        "Gutscheingold Home": "https://www.gutscheingold.de/home/#einloesepartner",
-        "Gutscheingold Entertainment": "https://www.gutscheingold.de/entertainment/#einloesepartner",
         "Wunschgutschein": "https://www.wunschgutschein.de/pages/beliebtesten-einloesepartner",
         "Wunschgutschein Home & Living": "https://www.wunschgutschein.de/products/home-living-gutschein",
         "Wunschgutschein Mobilität": "https://www.wunschgutschein.de/products/tankgutschein", 
         "Wunschgutschein Kids & Fun": "https://www.wunschgutschein.de/products/kids-gutschein"
-    
     };
 
     const googleLuckyDomains = {
         "Shoop": "shoop.de", "Shopbuddies": "shopbuddies.de/cashback", "Bestshopping": "bestshopping.com",
         "mycashbacks": "mycashbacks.com", "Wondercashback": "wondercashback.de", "Shopback": "shopback.de",
-        "iGraal": "de.igraal.com/gutschein", "Opera Cashback": "cashback.opera.com", "TopCashback": "topcashback.de",
+        "Opera Cashback": "cashback.opera.com", "TopCashback": "topcashback.de",
         "Shopmate": "shopmate.eu", "WEB.Cent": "vorteile.web.de", "DeutschlandCard": "deutschlandcard.de/partner",
         "Budgey": "budgey.de", "Geschenkkartenwelt.de": "geschenkkartenwelt.de",
         "Unidays": "myunidays.com", "Studentbeans": "studentbeans.com", "BSW": "bsw.de", "Zave.it": "zave.it",
@@ -109,8 +93,6 @@
                 for (let node of header.childNodes) {
                     if (node.nodeType === Node.TEXT_NODE) {
                         const cleanText = node.textContent.trim();
-                        if (cleanText.toLowerCase().includes("wunschgutschein")) continue;
-
                         let url = bcLinks[cleanText] || directLinks[cleanText];
 
                         if (url) {
@@ -134,6 +116,8 @@
                 area.querySelectorAll('.item-name').forEach(item => {
                     if (item.querySelector('a')) return;
                     const text = item.textContent.trim();
+                    
+                    // Wunschgutschein im Text-Bereich weiterhin ignorieren
                     if (text.toLowerCase().includes("wunschgutschein")) return;
 
                     let currentType = "";
@@ -147,6 +131,7 @@
                     if (text === "Penny Kartenwelt") url = `https://kartenwelt.penny.de/catalogsearch/result/?q=${encodeURIComponent(shopName)}`;
                     else if (text === "REWE Kartenwelt") url = `https://kartenwelt.rewe.de/catalogsearch/result/?q=${encodeURIComponent(shopName)}`;
                     else if (text === "Payback") url = `https://www.payback.de/shop/${shopName.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+                    else if (text === "iGraal") url = `https://de.igraal.com/gutschein/${shopName.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
                     else if (text === "TopCashback" && currentType.includes("gutscheine")) url = "https://www.topcashback.de/EarnCashback.aspx?mpurl=topcashback-geschenkkarten";
                     else if (directLinks[text]) url = directLinks[text];
                     else if (googleLuckyDomains[text]) url = `https://www.google.com/search?q=site%3A${googleLuckyDomains[text]}+${encodeURIComponent(shopName)}&btnI=I`;
@@ -173,8 +158,8 @@
     // ==========================================
     function runPopup() {
         if (window.top !== window.self) return;
-        const ignoreDomains = [OPTIMIZER_DOMAIN, 'google.', 'bing.', 'localhost', '127.0.0.1'];
-        if (ignoreDomains.some(d => location.hostname.includes(d))) return;
+        const ignoreDomains = [MAIN_DOMAIN, 'gitlab.io', 'google.', 'bing.', 'localhost', '127.0.0.1'];
+        if (ignoreDomains.some(d => location.href.includes(d))) return;
 
         function normalize(s) { return s ? s.toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss').replace(/[^a-z0-9]/g,'') : ''; }
         function getSegments(h) {
@@ -231,7 +216,6 @@
             `;
 
             const p = document.createElement('div'); p.id = 'p';
-            // Wieder zurück auf ICON_URL
             p.innerHTML = `<div id="h"><img id="i" src="${ICON_URL}"><a id="l">${shopName} Cashback</a><button id="c">&times;</button></div><iframe id="fr"></iframe>`;
 
             const l = p.querySelector('#l'), fr = p.querySelector('#fr'), c = p.querySelector('#c');
@@ -241,7 +225,8 @@
         });
     }
 
-    if (location.hostname.includes(OPTIMIZER_DOMAIN)) {
+    // Prüfung auf welche Domain das Script angewendet wird
+    if (location.href.includes(MAIN_DOMAIN) || location.href.includes("kolateeprojects.gitlab.io/cashback_optimizer")) {
         runLinker();
     } else {
         runPopup();
