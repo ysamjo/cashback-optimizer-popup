@@ -4,6 +4,7 @@ Ein kompaktes Userscript, das dir automatisch anzeigt, ob es für den aktuellen 
 
 ## Features
 - 🚀 **Automatische Erkennung:** Erkennt hunderte Shops basierend auf der URL.
+- 🔗 **Verlinkung:** Fügt wenn möglich einen Deeplink auf die entsprechende Cashback-/Gutscheinseite ein.
 - 🖼️ **Gecachtes Icon:** Lädt das Favicon effizient aus dem Speicher (CSP-safe).
 - ⚡ **Performance:** Nutzt lokales Caching, um keine unnötigen Netzwerkanfragen zu stellen.
 - 🔍 **Direktsuche:** Ein Klick öffnet die passenden Ergebnisse auf Cashback-Optimizer.de.
