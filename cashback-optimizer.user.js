@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Cashback-Optimizer Suite
 // @namespace    http://tampermonkey.net/
-// @version      4.03
+// @version      4.04
 // @description  Shop-Popup mit automatischer Verlinkung.
 // @author       ruler
 // @match        *://*/*
@@ -144,8 +144,7 @@
                     }
 
                     let url = "";
-                                       if (text === "Marktkauf Kartenwelt") url = `https://www.marktkauf.de/geschenk-gutscheinkarten/suche?q=${encodeURIComponent(shopName)}`;
-                    else if (text === "Penny Kartenwelt") url = `https://kartenwelt.penny.de/catalogsearch/result/?q=${encodeURIComponent(shopName)}`;
+                    if (text === "Penny Kartenwelt") url = `https://kartenwelt.penny.de/catalogsearch/result/?q=${encodeURIComponent(shopName)}`;
                     else if (text === "REWE Kartenwelt") url = `https://kartenwelt.rewe.de/catalogsearch/result/?q=${encodeURIComponent(shopName)}`;
                     else if (text === "Payback") url = `https://www.payback.de/shop/${shopName.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
                     else if (text === "TopCashback" && currentType.includes("gutscheine")) url = "https://www.topcashback.de/EarnCashback.aspx?mpurl=topcashback-geschenkkarten";
