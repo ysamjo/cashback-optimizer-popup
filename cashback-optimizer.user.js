@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Cashback-Optimizer Suite
 // @namespace    http://tampermonkey.net/
-// @version      4.0
+// @version      4.01
 // @description  Shop-Popup mit automatischer Verlinkung.
 // @author       ruler
 // @match        *://*/*
@@ -27,7 +27,7 @@
         "AmEx Offers": "https://m.amex/amexofferslp2024",
         "Cadooz (AmEx)": "https://m.amex/amexofferslp2024",
         "Miles & More": "https://www.miles-and-more.com/de/de/earn/shopping/shopping-platform.html?l=de",
-        "Corporate Benefits": "https://l-bank.mitarbeiterangebote.de/",
+        "Corporate Benefits": "https://mitarbeiterangebote.de/",
         "BestChoice BenefitBuddy": "https://www.benefitbuddy.de/",
         "Cadooz (MyDealz)": "https://www.mydealz.de/deals/mydealz-cadooz-vorteilswelt-jetzt-fur-alle-zb-bestchoice-classic-50eur-5eur-i-adidas-12-cyberport-4-eterna-15-lieferando-5-etc-2353520",
         "Cadooz (Sparwelt)": "https://www.sparwelt.de/themenwelten/sparwelt-vorteilswelt",
@@ -35,8 +35,8 @@
         "Payback Prämienshop": "https://www.payback.de/praemien/kategorie/gutscheine",
         "Dealwise (ING)": "https://banking.ing.de/app/da_dealwise",
         "Dealwise": "https://banking.ing.de/app/da_dealwise",
-        "Benefits for me": "https://l-bank.benefits.me/",
-        "benefitforme": "https://l-bank.benefits.me/"
+        "Benefits for me": "https://benefits.me/",
+        "benefitforme": "https://benefits.me/"
     };
 
     const bcLinks = {
@@ -49,11 +49,11 @@
         "BestChoice Fit & Healthy": "https://fit-healthy-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Drive & Ride": "https://drive-ride-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice DIY & Garden": "https://diy-garden-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
-        "BestChoice Food & Drinks": "https://food-drinks-catalog.cadooz.com",
-        "BestChoice Home & Living": "https://home-living-catalog.cadooz.com",
-        "BestChoice Home & Office": "https://home-office-catalog.cadooz.com",
+        "BestChoice Food & Drinks": "https://food-drinks-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
+        "BestChoice Home & Living": "https://home-living-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
+        "BestChoice Home & Office": "https://home-office-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Kids & Play": "https://kids-play-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
-        "BestChoice Sport & Hobby": "https://sport-hobby-catalog.cadooz.com",
+        "BestChoice Sport & Hobby": "https://sport-hobby-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Streaming & Entertainment": "https://streaming-entertainment-catalog.cadooz.com",
         "BestChoice Tech & Media": "https://tech-media-catalog.cadooz.com",
         "BestChoice Travel & Adventure": "https://travel-adventure-catalog.cadooz.com",
@@ -69,7 +69,7 @@
         "Shoop": "shoop.de", "Shopbuddies": "shopbuddies.de", "Bestshopping": "bestshopping.com",
         "mycashbacks": "mycashbacks.com", "Wondercashback": "wondercashback.de", "Shopback": "shopback.de",
         "iGraal": "de.igraal.com", "Opera Cashback": "cashback.opera.com", "TopCashback": "topcashback.de",
-        "Shopmate": "shopmate.de", "WEB.Cent": "vorteilswelt.web.de", "DeutschlandCard": "deutschlandcard.de",
+        "Shopmate": "shopmate.eu", "WEB.Cent": "vorteilswelt.web.de", "DeutschlandCard": "deutschlandcard.de",
         "Klarna": "klarna.com", "Budgey": "budgey.de", "Geschenkkartenwelt.de": "geschenkkartenwelt.de",
         "Unidays": "myunidays.com", "Studentbeans": "studentbeans.com", "BSW": "bsw.de", "Zave.it": "zave.it",
         "Incent": "incent.de", "Prime Benefits": "prime-benefits.de",
