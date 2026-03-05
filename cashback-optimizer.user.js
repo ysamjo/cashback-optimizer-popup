@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Cashback-Optimizer Suite
 // @namespace    http://tampermonkey.net/
-// @version      4.01
+// @version      4.02
 // @description  Shop-Popup mit automatischer Verlinkung.
 // @author       ruler
 // @match        *://*/*
@@ -26,6 +26,7 @@
         "Allianz Vorteilswelt": "https://vorteile.allianz.de/einkaufsvorteile",
         "AmEx Offers": "https://m.amex/amexofferslp2024",
         "Cadooz (AmEx)": "https://m.amex/amexofferslp2024",
+        "Vip District / MIVO": "https://mitarbeitervorteile.de/",
         "Miles & More": "https://www.miles-and-more.com/de/de/earn/shopping/shopping-platform.html?l=de",
         "Corporate Benefits": "https://mitarbeiterangebote.de/",
         "BestChoice BenefitBuddy": "https://www.benefitbuddy.de/",
@@ -36,7 +37,14 @@
         "Dealwise (ING)": "https://banking.ing.de/app/da_dealwise",
         "Dealwise": "https://banking.ing.de/app/da_dealwise",
         "Benefits for me": "https://benefits.me/",
-        "benefitforme": "https://benefits.me/"
+        "benefitforme": "https://benefits.me/",
+        "O2 Priority": "https://www.o2online.de/priority/vorteile/priority-vorteilswelt",
+   "Klarna": "https://www.klarna.com/de/store/",
+       "Netto Kartenwelt": "https://www.netto-online.de/geschenk-gutscheinkarten/", 
+        "Marktkauf Kartenwelt": "https://www.marktkauf.de/geschenk-gutscheinkarten/kat-M0740", 
+        "Hanseatic Vorteilswelt": "https://meine.hanseaticbank.de/?redirect=voucherPortal"
+        
+        
     };
 
     const bcLinks = {
@@ -55,8 +63,8 @@
         "BestChoice Kids & Play": "https://kids-play-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Sport & Hobby": "https://sport-hobby-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Streaming & Entertainment": "https://streaming-entertainment-catalog.cadooz.com",
-        "BestChoice Tech & Media": "https://tech-media-catalog.cadooz.com",
-        "BestChoice Travel & Adventure": "https://travel-adventure-catalog.cadooz.com",
+        "BestChoice Tech & Media": "https://tech-media-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
+        "BestChoice Travel & Adventure": "https://travel-adventure-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Charity & Giving": "https://charity-giving-catalog.cadooz.com",
         "BestChoice Europe": "https://europe-catalog.cadooz.com",
         "BestChoice Europe Premium": "https://europe-premium-catalog.cadooz.com",
@@ -70,10 +78,9 @@
         "mycashbacks": "mycashbacks.com", "Wondercashback": "wondercashback.de", "Shopback": "shopback.de",
         "iGraal": "de.igraal.com", "Opera Cashback": "cashback.opera.com", "TopCashback": "topcashback.de",
         "Shopmate": "shopmate.eu", "WEB.Cent": "vorteilswelt.web.de", "DeutschlandCard": "deutschlandcard.de",
-        "Klarna": "klarna.com", "Budgey": "budgey.de", "Geschenkkartenwelt.de": "geschenkkartenwelt.de",
+        "Budgey": "budgey.de", "Geschenkkartenwelt.de": "geschenkkartenwelt.de",
         "Unidays": "myunidays.com", "Studentbeans": "studentbeans.com", "BSW": "bsw.de", "Zave.it": "zave.it",
-        "Incent": "incent.de", "Prime Benefits": "prime-benefits.de",
-        "Hanseatic Vorteilswelt": "vorteilswelt.hanseaticbank.de", "O2 Priority": "priority.o2online.de"
+        "Hanseatic Vorteilswelt": "vorteilswelt.hanseaticbank.de",
     };
 
     // ==========================================
@@ -124,8 +131,7 @@
                     }
 
                     let url = "";
-                    if (text === "Netto Kartenwelt") url = `https://www.netto-online.de/p/search?searchTerm=${encodeURIComponent(shopName)}`;
-                    else if (text === "Marktkauf Kartenwelt") url = `https://www.marktkauf.de/geschenk-gutscheinkarten/suche?q=${encodeURIComponent(shopName)}`;
+                                       if (text === "Marktkauf Kartenwelt") url = `https://www.marktkauf.de/geschenk-gutscheinkarten/suche?q=${encodeURIComponent(shopName)}`;
                     else if (text === "Penny Kartenwelt") url = `https://kartenwelt.penny.de/catalogsearch/result/?q=${encodeURIComponent(shopName)}`;
                     else if (text === "REWE Kartenwelt") url = `https://kartenwelt.rewe.de/catalogsearch/result/?q=${encodeURIComponent(shopName)}`;
                     else if (text === "Payback") url = `https://www.payback.de/shop/${shopName.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
