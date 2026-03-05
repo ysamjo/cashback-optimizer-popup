@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Cashback-Optimizer Suite
 // @namespace    http://tampermonkey.net/
-// @version      4.05
+// @version      4.06
 // @description  Shop-Popup mit automatischer Verlinkung.
 // @author       ruler
 // @match        *://*/*
@@ -87,10 +87,10 @@
     };
 
     const googleLuckyDomains = {
-        "Shoop": "shoop.de", "Shopbuddies": "shopbuddies.de", "Bestshopping": "bestshopping.com",
+        "Shoop": "shoop.de", "Shopbuddies": "shopbuddies.de/cashback", "Bestshopping": "bestshopping.com",
         "mycashbacks": "mycashbacks.com", "Wondercashback": "wondercashback.de", "Shopback": "shopback.de",
-        "iGraal": "de.igraal.com", "Opera Cashback": "cashback.opera.com", "TopCashback": "topcashback.de",
-        "Shopmate": "shopmate.eu", "WEB.Cent": "vorteile.web.de", "DeutschlandCard": "deutschlandcard.de",
+        "iGraal": "de.igraal.com/gutschein", "Opera Cashback": "cashback.opera.com", "TopCashback": "topcashback.de",
+        "Shopmate": "shopmate.eu", "WEB.Cent": "vorteile.web.de", "DeutschlandCard": "deutschlandcard.de/partner",
         "Budgey": "budgey.de", "Geschenkkartenwelt.de": "geschenkkartenwelt.de",
         "Unidays": "myunidays.com", "Studentbeans": "studentbeans.com", "BSW": "bsw.de", "Zave.it": "zave.it",
         "Hanseatic Vorteilswelt": "vorteilswelt.hanseaticbank.de",
