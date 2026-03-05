@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Cashback-Optimizer Suite
 // @namespace    http://tampermonkey.net/
-// @version      4.02
+// @version      4.03
 // @description  Shop-Popup mit automatischer Verlinkung.
 // @author       ruler
 // @match        *://*/*
@@ -36,13 +36,14 @@
         "Payback Prämienshop": "https://www.payback.de/praemien/kategorie/gutscheine",
         "Dealwise (ING)": "https://banking.ing.de/app/da_dealwise",
         "Dealwise": "https://banking.ing.de/app/da_dealwise",
-        "Benefits for me": "https://benefits.me/",
         "benefitforme": "https://benefits.me/",
         "O2 Priority": "https://www.o2online.de/priority/vorteile/priority-vorteilswelt",
    "Klarna": "https://www.klarna.com/de/store/",
        "Netto Kartenwelt": "https://www.netto-online.de/geschenk-gutscheinkarten/", 
         "Marktkauf Kartenwelt": "https://www.marktkauf.de/geschenk-gutscheinkarten/kat-M0740", 
-        "Hanseatic Vorteilswelt": "https://meine.hanseaticbank.de/?redirect=voucherPortal"
+        "Hanseatic Vorteilswelt": "https://meine.hanseaticbank.de/?redirect=voucherPortal",
+         "MeinMagenta": "https://www.telekom.de/magenta-moments",
+        "Samsung Members": "https://www.samsung.com/de/apps/samsung-members/"
         
         
     };
@@ -70,7 +71,19 @@
         "BestChoice Europe Premium": "https://europe-premium-catalog.cadooz.com",
         "BestChoice Product": "https://product-catalog.cadooz.com",
         "BestChoice Classic CH": "https://bestchoice-classic-ch-catalog.cadooz.com",
-        "BestChoice Classic AT": "https://bestchoice-classic-at-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&locale=default&sortBy=alpha&ptg=vou"
+        "BestChoice Classic AT": "https://bestchoice-classic-at-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&locale=default&sortBy=alpha&ptg=vou",
+        "Gutscheingold Beauty": "https://www.gutscheingold.de/beauty/#einloesepartner",
+        "Gutscheingold Beauty": "https://www.gutscheingold.de/beauty/#einloesepartner",
+        "Gutscheingold": "https://www.gutscheingold.de/grusskarten/#einloesepartner",
+          "Gutscheingold Kids": "https://www.gutscheingold.de/kids/#einloesepartner",
+         "Gutscheingold Fashion": "https://www.gutscheingold.de/fashion/#einloesepartner",
+             "Gutscheingold Home": "https://www.gutscheingold.de/home/#einloesepartner",
+        "Gutscheingold Entertainment": "https://www.gutscheingold.de/entertainment/#einloesepartner",
+                "Wunschgutschein": "https://www.wunschgutschein.de/pages/beliebtesten-einloesepartner",
+       "Wunschgutschein Home & Living": "https://www.wunschgutschein.de/products/home-living-gutschein",
+      "Wunschgutschein Mobilität": "https://www.wunschgutschein.de/products/tankgutschein", 
+      "Wunschgutschein Kids & Fun": "https://www.wunschgutschein.de/products/kids-gutschein"
+    
     };
 
     const googleLuckyDomains = {
