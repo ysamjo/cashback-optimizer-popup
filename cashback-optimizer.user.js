@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Cashback-Optimizer Suite
 // @namespace    http://tampermonkey.net/
-// @version      4.07
-// @description  Shop-Popup mit automatischer Verlinkung.
+// @version      4.2
+// @description  Verlinkungen und Popup für cashback-optimizer.de
 // @author       ruler
 // @match        *://*/*
 // @grant        GM_xmlhttpRequest
@@ -15,13 +15,13 @@
 (function() {
     'use strict';
 
-    // ==========================================
-    // 1. GEMEINSAME KONFIGURATION & LINKS
-    // ==========================================
     const MAIN_DOMAIN = "cashback-optimizer.de";
-    const GITLAB_DOMAIN = "kolateeprojects.gitlab.io/cashback_optimizer";
+    const GITLAB_PATH = "kolateeprojects.gitlab.io/cashback_optimizer";
     const ICON_URL = "https://cashback-optimizer.de/favicons/favicon.svg";
 
+    // ==========================================
+    // 1. GEMEINSAME KONFIGURATION
+    // ==========================================
     const directLinks = {
         "Sovendus": "https://cashback-optimizer.de/sovendus/",
         "Allianz Vorteilswelt": "https://vorteile.allianz.de/einkaufsvorteile",
@@ -35,13 +35,10 @@
         "Cadooz (Sparwelt)": "https://www.sparwelt.de/themenwelten/sparwelt-vorteilswelt",
         "Benefit Buddy": "https://www.benefitbuddy.de/",
         "Payback Prämienshop": "https://www.payback.de/praemien/kategorie/gutscheine",
-        "Dealwise (ING)": "https://banking.ing.de/app/da_dealwise",
-        "Dealwise": "https://banking.ing.de/app/da_dealwise",
         "benefitforme": "https://benefits.me/",
         "O2 Priority": "https://www.o2online.de/priority/vorteile/priority-vorteilswelt",
-        "Klarna": "https://www.klarna.com/de/store/",
-        "Netto Kartenwelt": "https://www.netto-online.de/geschenk-gutscheinkarten/", 
-        "Marktkauf Kartenwelt": "https://www.marktkauf.de/geschenk-gutscheinkarten/kat-M0740", 
+        "Netto Kartenwelt": "https://www.netto-online.de/geschenk-gutscheinkarten/",
+        "Marktkauf Kartenwelt": "https://www.marktkauf.de/geschenk-gutscheinkarten/kat-M0740",
         "Hanseatic Vorteilswelt": "https://meine.hanseaticbank.de/?redirect=voucherPortal",
         "MeinMagenta": "https://www.telekom.de/magenta-moments",
         "Samsung Members": "https://www.samsung.com/de/apps/samsung-members/"
@@ -64,120 +61,119 @@
         "BestChoice Sport & Hobby": "https://sport-hobby-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Tech & Media": "https://tech-media-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Travel & Adventure": "https://travel-adventure-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
+        // Wunschgutschein App-Links
         "Wunschgutschein": "https://www.wunschgutschein.de/pages/beliebtesten-einloesepartner",
-        "Wunschgutschein Home & Living": "https://www.wunschgutschein.de/products/home-living-gutschein",
-        "Wunschgutschein Mobilität": "https://www.wunschgutschein.de/products/tankgutschein", 
-        "Wunschgutschein Kids & Fun": "https://www.wunschgutschein.de/products/kids-gutschein"
+        "Wunschgutschein Beauty": "https://app.wunschgutschein.de/beauty#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Home & Living": "https://app.wunschgutschein.de/homeandliving#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Fashion": "https://app.wunschgutschein.de/fashion#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Shopping": "https://app.wunschgutschein.de/shopping#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Sport": "https://app.wunschgutschein.de/sport#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Mobilität": "https://app.wunschgutschein.de/mobilitaet#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Tanken": "https://app.wunschgutschein.de/mobility#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Kids & Fun": "https://app.wunschgutschein.de/kids#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        // Gutscheingold
+        "Gutscheingold": "https://www.gutscheingold.de/grusskarten/#einloesepartner",
+        "Gutscheingold Beauty": "https://www.gutscheingold.de/beauty/#einloesepartner",
+        "Gutscheingold Kids": "https://www.gutscheingold.de/kids/#einloesepartner",
+        "Gutscheingold Fashion": "https://www.gutscheingold.de/fashion/#einloesepartner",
+        "Gutscheingold Home": "https://www.gutscheingold.de/home/#einloesepartner",
+        "Gutscheingold Entertainment": "https://www.gutscheingold.de/entertainment/#einloesepartner"
     };
 
     const googleLuckyDomains = {
-        "Shoop": "shoop.de", "Shopbuddies": "shopbuddies.de/cashback", "Bestshopping": "bestshopping.com",
+        "Shoop": "shoop.de", "TopCashback": "topcashback.de",
         "mycashbacks": "mycashbacks.com", "Wondercashback": "wondercashback.de", "Shopback": "shopback.de",
-        "Opera Cashback": "cashback.opera.com", "TopCashback": "topcashback.de",
-        "Shopmate": "shopmate.eu", "WEB.Cent": "vorteile.web.de", "DeutschlandCard": "deutschlandcard.de/partner",
-        "Budgey": "budgey.de", "Geschenkkartenwelt.de": "geschenkkartenwelt.de",
-        "Unidays": "myunidays.com", "Studentbeans": "studentbeans.com", "BSW": "bsw.de", "Zave.it": "zave.it",
-        "Hanseatic Vorteilswelt": "vorteilswelt.hanseaticbank.de",
+        "Shopmate": "shopmate.eu", "DeutschlandCard": "deutschlandcard.de/partner", "Budgey": "budgey.de",
+        "Geschenkkartenwelt.de": "geschenkkartenwelt.de", "Unidays": "myunidays.com",
+        "Studentbeans": "studentbeans.com", "BSW": "bsw.de", "Zave.it": "zave.it"
     };
 
     // ==========================================
-    // 2. MODUL: LINK-ENRICHER
+    // 2. MODUL: LINK-ENRICHER (Auf Optimizer/GitLab)
     // ==========================================
     function runLinker() {
+        if (window.top !== window.self) {
+            const style = document.createElement('style');
+            style.textContent = `
+                .general-center, #top-logo, #tagBar, #impressumToggle { display: none !important; }
+                .content-wrapper { padding-top: 5px !important; }
+                .filter { margin-top: 0 !important; margin-bottom: 5px !important; }
+            `;
+            document.head.appendChild(style);
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('filter')) {
+                const scrollObserver = new MutationObserver((mutations, obs) => {
+                    const firstShop = document.querySelector('.shop-area-header.filter-tag, .voucher-area-header.filter-tag');
+                    if (firstShop && firstShop.offsetParent !== null) {
+                        firstShop.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        obs.disconnect();
+                    }
+                });
+                scrollObserver.observe(document.body, { childList: true, subtree: true });
+            }
+        }
+
         const linkStyle = "color:inherit; text-decoration:none; border-bottom: 1px dotted gray;";
 
         function enrich() {
             document.querySelectorAll('.voucher-area-header.filter-tag, .shop-area-header.filter-tag').forEach(header => {
                 if (header.querySelector('a.cb-opt-link')) return;
-
-                for (let node of header.childNodes) {
-                    if (node.nodeType === Node.TEXT_NODE) {
-                        const cleanText = node.textContent.trim();
-                        let url = bcLinks[cleanText] || directLinks[cleanText];
-
-                        if (url) {
-                            const link = document.createElement('a');
-                            link.href = url;
-                            link.target = "_blank";
-                            link.className = "cb-opt-link";
-                            link.style = linkStyle;
-                            link.textContent = node.textContent;
-                            header.replaceChild(link, node);
-                            break;
-                        }
-                    }
-                }
+                const text = header.textContent.trim();
+                let url = bcLinks[text] || directLinks[text];
+                if (url) header.innerHTML = `<a href="${url}" target="_blank" class="cb-opt-link" style="${linkStyle}">${text}</a>`;
             });
 
             document.querySelectorAll('.shop-area, .voucher-area').forEach(area => {
                 const header = area.querySelector('.shop-area-header.filter-tag, .voucher-area-header.filter-tag');
                 const shopName = header ? header.textContent.replace(/<.*%/, '').trim() : "";
+                const cleanPart = shopName.toLowerCase().replace(/[^a-z0-9]/g, '');
 
                 area.querySelectorAll('.item-name').forEach(item => {
                     if (item.querySelector('a')) return;
                     const text = item.textContent.trim();
-                    
-                    // Wunschgutschein im Text-Bereich weiterhin ignorieren
-                    if (text.toLowerCase().includes("wunschgutschein")) return;
-
-                    let currentType = "";
-                    let prev = item.previousElementSibling;
-                    while (prev) {
-                        if (prev.classList.contains('type-area')) { currentType = prev.textContent.trim().toLowerCase(); break; }
-                        prev = prev.previousElementSibling;
-                    }
+                    if (text.toLowerCase().includes("wunschgutschein") || text.toLowerCase().includes("gutscheingold")) return;
 
                     let url = "";
                     if (text === "Penny Kartenwelt") url = `https://kartenwelt.penny.de/catalogsearch/result/?q=${encodeURIComponent(shopName)}`;
                     else if (text === "REWE Kartenwelt") url = `https://kartenwelt.rewe.de/catalogsearch/result/?q=${encodeURIComponent(shopName)}`;
-                    else if (text === "Payback") url = `https://www.payback.de/shop/${shopName.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
-                    else if (text === "iGraal") url = `https://de.igraal.com/gutschein/${shopName.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
-                    else if (text === "TopCashback" && currentType.includes("gutscheine")) url = "https://www.topcashback.de/EarnCashback.aspx?mpurl=topcashback-geschenkkarten";
+                    else if (text === "Payback") url = `https://www.payback.de/shop/${cleanPart}`;
+                    else if (text === "iGraal") url = `https://de.igraal.com/search/results?term=${encodeURIComponent(shopName)}`;
+                    else if (text === "Opera Cashback") url = `https://www.google.com/search?q=site%3Acashback.opera.com%2Fde%2Fshops+${encodeURIComponent(shopName)}&btnI=I`;
+                    else if (text === "WEB.Cent") url = `https://shopping.web.de/webcent?q=${encodeURIComponent(shopName)}&comp=web_start_sf#.cbk.nav.suche`;
+                    else if (text === "Dealwise" || text === "Dealwise (ING)") url = `https://www.dealwise.de/results/${encodeURIComponent(shopName)}`;
+                    else if (text === "Shopbuddies") url = `https://shopbuddies.de/cashback/search?query=${encodeURIComponent(shopName)}`;
+                    else if (text === "Klarna") url = `https://www.klarna.com/de/store/?search=${encodeURIComponent(shopName).replace(/%20/g, '+')}`;
+                    else if (text === "TopCashback" && (item.previousElementSibling && item.previousElementSibling.textContent.trim().toLowerCase().includes("gutscheine"))) url = "https://www.topcashback.de/EarnCashback.aspx?mpurl=topcashback-geschenkkarten";
                     else if (directLinks[text]) url = directLinks[text];
                     else if (googleLuckyDomains[text]) url = `https://www.google.com/search?q=site%3A${googleLuckyDomains[text]}+${encodeURIComponent(shopName)}&btnI=I`;
 
-                    if (url) {
-                        item.innerHTML = `<a href="${url}" target="_blank" style="${linkStyle}">${text}</a>`;
-                    }
+                    if (url) item.innerHTML = `<a href="${url}" target="_blank" style="${linkStyle}">${text}</a>`;
                 });
             });
         }
-
         enrich();
-        let timeout;
-        const observer = new MutationObserver(() => {
-            clearTimeout(timeout);
-            timeout = setTimeout(enrich, 200);
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
-        document.addEventListener('keyup', (e) => { if (e.target.id === 'textFilter') enrich(); });
+        new MutationObserver(enrich).observe(document.body, { childList: true, subtree: true });
     }
 
     // ==========================================
-    // 3. MODUL: POPUP-LOGIK
+    // 3. MODUL: POPUP-LOGIK (Fremde Seiten)
     // ==========================================
     function runPopup() {
         if (window.top !== window.self) return;
-        const ignoreDomains = [MAIN_DOMAIN, 'gitlab.io', 'google.', 'bing.', 'localhost', '127.0.0.1'];
+        const ignoreDomains = [MAIN_DOMAIN, 'gitlab.io', 'google.', 'bing.', 'localhost', '127.0.0.1', 'ycombinator.com'];
         if (ignoreDomains.some(d => location.href.includes(d))) return;
 
         function normalize(s) { return s ? s.toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss').replace(/[^a-z0-9]/g,'') : ''; }
-        function getSegments(h) {
-            const c = h.replace(/^www\d*\./, '').toLowerCase();
-            const p = c.split('.');
-            return p.length >= 3 ? [p.slice(0,-1).join('.'), p[0], p[1]] : [p[0]];
-        }
-
-        const CACHE_KEY = "cb_opt_cache", CACHE_TIME = "cb_opt_time", LIFE = 86400000;
 
         async function getData() {
-            const cached = GM_getValue(CACHE_KEY);
-            const time = GM_getValue(CACHE_TIME, 0);
+            const CACHE_KEY = "cb_opt_cache", LIFE = 86400000;
+            const cached = GM_getValue(CACHE_KEY), time = GM_getValue("cb_opt_time", 0);
             if (cached && (Date.now() - time < LIFE)) return cached;
             return new Promise(resolve => {
                 GM_xmlhttpRequest({
                     method: "GET", url: "https://cashback-optimizer.de/",
-                    onload: r => { GM_setValue(CACHE_KEY, r.responseText); GM_setValue(CACHE_TIME, Date.now()); resolve(r.responseText); }
+                    onload: r => { GM_setValue(CACHE_KEY, r.responseText); GM_setValue("cb_opt_time", Date.now()); resolve(r.responseText); }
                 });
             });
         }
@@ -185,47 +181,69 @@
         getData().then(html => {
             const doc = new DOMParser().parseFromString(html, "text/html");
             const headers = Array.from(doc.querySelectorAll(".shop-area-header.filter-tag"));
-            const segments = getSegments(location.hostname);
-            let foundShop = null;
+            const segments = location.hostname.toLowerCase().split('.');
+            const filtered = segments.filter(s => !['www', 'news', 'de', 'com'].includes(s));
 
-            for (let seg of segments) {
-                const normSeg = normalize(seg);
-                foundShop = headers.find(h => normalize(h.textContent) === normSeg || (normSeg.length >= 4 && normalize(h.textContent).startsWith(normSeg)));
-                if (foundShop) break;
+            let foundShop = null;
+            if (filtered.length > 0) {
+                const target = normalize(filtered[0]);
+                foundShop = headers.find(h => {
+                    const hNorm = normalize(h.textContent);
+                    return hNorm === target || (target.length >= 5 && hNorm.startsWith(target));
+                });
             }
 
             if (!foundShop) return;
             const shopName = foundShop.textContent.trim();
             const filterUrl = `https://cashback-optimizer.de/?filter=${encodeURIComponent(shopName).replace(/%20/g, '+')}`;
 
-            const host = document.createElement('div');
-            document.body.appendChild(host);
-            const shadow = host.attachShadow({mode: 'open'});
+            const hostDiv = document.createElement('div');
+            document.body.appendChild(hostDiv);
+            const shadow = hostDiv.attachShadow({mode: 'open'});
             const style = document.createElement('style');
             style.textContent = `
-                #p{position:fixed;bottom:20px;right:20px;background:#fffbe7;border-radius:14px;box-shadow:0 4px 15px rgba(0,0,0,0.2);border:1px solid #e0c200;z-index:2147483647;font-family:sans-serif;width:260px;height:54px;display:flex;flex-direction:column;overflow:hidden;transition:width .4s cubic-bezier(.25,1,.5,1),height .4s cubic-bezier(.25,1,.5,1);will-change:width,height;animation:s .3s cubic-bezier(.25,1,.5,1) forwards}
-                @keyframes s{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-                #p.ex{width:420px;height:360px;background:#fff}
-                #h{display:flex;align-items:center;width:100%;padding:0 12px 0 16px;box-sizing:border-box;height:54px;flex-shrink:0}
+                #p{position:fixed;bottom:20px;right:20px;background:#fffbe7;border-radius:14px;box-shadow:0 4px 15px rgba(0,0,0,0.2);border:1px solid #e0c200;z-index:2147483647;font-family:sans-serif;width:260px;height:54px;display:flex;flex-direction:column;overflow:hidden;transition:all .4s cubic-bezier(.25,1,.5,1);}
+                #p.ex{width:420px;height:380px;}
+                #h{display:flex;align-items:center;width:100%;padding:0 12px 0 16px;box-sizing:border-box;height:54px;flex-shrink:0;cursor:pointer;}
                 #p.ex #h{border-bottom:1px solid #e0c200;height:50px}
-                #i{width:22px;height:22px;margin-right:12px;display:block}
-                #l{flex:1;color:#b1a100;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+                #i{width:22px;height:22px;margin-right:12px;}
+                #l{flex:1;color:#b1a100;font-weight:600;font-size:16px;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
                 #c{all:unset;cursor:pointer;font-size:1.5em;color:#b1a100;width:30px;text-align:center}
-                #fr{width:100%;flex:1;border:none;opacity:0;visibility:hidden;transition:opacity .3s ease .2s}
-                #p.ex #fr{opacity:1;visibility:visible}
+                #fr{width:100%;flex:1;border:none;display:none;background:transparent;}
+                #p.ex #fr{display:block;}
             `;
 
             const p = document.createElement('div'); p.id = 'p';
-            p.innerHTML = `<div id="h"><img id="i" src="${ICON_URL}"><a id="l">${shopName} Cashback</a><button id="c">&times;</button></div><iframe id="fr"></iframe>`;
+            p.innerHTML = `<div id="h"><img id="i" src="${ICON_URL}"><span id="l">${shopName} Cashback</span><button id="c">&times;</button></div><iframe id="fr"></iframe>`;
 
-            const l = p.querySelector('#l'), fr = p.querySelector('#fr'), c = p.querySelector('#c');
-            l.onclick = () => { if(!p.classList.contains('ex')){ p.classList.add('ex'); if(!fr.src) fr.src = filterUrl; } else { window.open(filterUrl, '_blank'); }};
-            c.onclick = () => host.remove();
+            const headerBar = p.querySelector('#h');
+            const iframe = p.querySelector('#fr');
+
+            headerBar.onclick = (e) => {
+                if(e.target.id === 'c') return;
+
+                if(!p.classList.contains('ex')){
+                    p.classList.add('ex');
+                    if(!iframe.src) iframe.src = filterUrl;
+                } else {
+                    if(e.target.id === 'l') {
+                        window.open(filterUrl, '_blank');
+                    } else {
+                        p.classList.remove('ex');
+                    }
+                }
+            };
+
+            p.querySelector('#c').onclick = (e) => { e.stopPropagation(); hostDiv.remove(); };
+
+            document.addEventListener('mousedown', (e) => {
+                if (!hostDiv.contains(e.target) && p.classList.contains('ex')) { p.classList.remove('ex'); }
+            });
+
             shadow.appendChild(style); shadow.appendChild(p);
         });
     }
 
-    // Prüfung auf welche Domain das Script angewendet wird
     if (location.href.includes(MAIN_DOMAIN) || location.href.includes("kolateeprojects.gitlab.io/cashback_optimizer")) {
         runLinker();
     } else {
