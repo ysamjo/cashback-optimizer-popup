@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Cashback-Optimizer Suite
 // @namespace    http://tampermonkey.net/
-// @version      4.2
-// @description  Verlinkungen und Popup für cashback-optimizer.de
+// @version      4.21
+// @description  Cashback-Optimizer Popup mit Verlinkungen
 // @author       ruler
 // @match        *://*/*
 // @grant        GM_xmlhttpRequest
@@ -61,17 +61,15 @@
         "BestChoice Sport & Hobby": "https://sport-hobby-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Tech & Media": "https://tech-media-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Travel & Adventure": "https://travel-adventure-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
-        // Wunschgutschein App-Links
         "Wunschgutschein": "https://www.wunschgutschein.de/pages/beliebtesten-einloesepartner",
         "Wunschgutschein Beauty": "https://app.wunschgutschein.de/beauty#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
         "Wunschgutschein Home & Living": "https://app.wunschgutschein.de/homeandliving#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
         "Wunschgutschein Fashion": "https://app.wunschgutschein.de/fashion#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
         "Wunschgutschein Shopping": "https://app.wunschgutschein.de/shopping#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
         "Wunschgutschein Sport": "https://app.wunschgutschein.de/sport#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
-        "Wunschgutschein Mobilität": "https://app.wunschgutschein.de/mobilitaet#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Mobilität": "https://app.wunschgutschein.de/mobility#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
         "Wunschgutschein Tanken": "https://app.wunschgutschein.de/mobility#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
-        "Wunschgutschein Kids & Fun": "https://app.wunschgutschein.de/kids#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
-        // Gutscheingold
+        "Wunschgutschein Kids & Fun": "https://app.wunschgutschein.de/kidsandfun#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
         "Gutscheingold": "https://www.gutscheingold.de/grusskarten/#einloesepartner",
         "Gutscheingold Beauty": "https://www.gutscheingold.de/beauty/#einloesepartner",
         "Gutscheingold Kids": "https://www.gutscheingold.de/kids/#einloesepartner",
@@ -81,7 +79,7 @@
     };
 
     const googleLuckyDomains = {
-        "Shoop": "shoop.de", "TopCashback": "topcashback.de",
+        "Shoop": "shoop.de", "TopCashback": "topcashback.de", "Bestshopping": "bestshopping.com",
         "mycashbacks": "mycashbacks.com", "Wondercashback": "wondercashback.de", "Shopback": "shopback.de",
         "Shopmate": "shopmate.eu", "DeutschlandCard": "deutschlandcard.de/partner", "Budgey": "budgey.de",
         "Geschenkkartenwelt.de": "geschenkkartenwelt.de", "Unidays": "myunidays.com",
@@ -127,7 +125,9 @@
             document.querySelectorAll('.shop-area, .voucher-area').forEach(area => {
                 const header = area.querySelector('.shop-area-header.filter-tag, .voucher-area-header.filter-tag');
                 const shopName = header ? header.textContent.replace(/<.*%/, '').trim() : "";
-                const cleanPart = shopName.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+                const searchShopName = (shopName === "Netto MD") ? "Netto" : shopName;
+                const cleanPart = searchShopName.toLowerCase().replace(/[^a-z0-9]/g, '');
 
                 area.querySelectorAll('.item-name').forEach(item => {
                     if (item.querySelector('a')) return;
@@ -135,18 +135,18 @@
                     if (text.toLowerCase().includes("wunschgutschein") || text.toLowerCase().includes("gutscheingold")) return;
 
                     let url = "";
-                    if (text === "Penny Kartenwelt") url = `https://kartenwelt.penny.de/catalogsearch/result/?q=${encodeURIComponent(shopName)}`;
-                    else if (text === "REWE Kartenwelt") url = `https://kartenwelt.rewe.de/catalogsearch/result/?q=${encodeURIComponent(shopName)}`;
+                    if (text === "Penny Kartenwelt") url = `https://kartenwelt.penny.de/catalogsearch/result/?q=${encodeURIComponent(searchShopName)}`;
+                    else if (text === "REWE Kartenwelt") url = `https://kartenwelt.rewe.de/catalogsearch/result/?q=${encodeURIComponent(searchShopName)}`;
                     else if (text === "Payback") url = `https://www.payback.de/shop/${cleanPart}`;
-                    else if (text === "iGraal") url = `https://de.igraal.com/search/results?term=${encodeURIComponent(shopName)}`;
-                    else if (text === "Opera Cashback") url = `https://www.google.com/search?q=site%3Acashback.opera.com%2Fde%2Fshops+${encodeURIComponent(shopName)}&btnI=I`;
-                    else if (text === "WEB.Cent") url = `https://shopping.web.de/webcent?q=${encodeURIComponent(shopName)}&comp=web_start_sf#.cbk.nav.suche`;
-                    else if (text === "Dealwise" || text === "Dealwise (ING)") url = `https://www.dealwise.de/results/${encodeURIComponent(shopName)}`;
-                    else if (text === "Shopbuddies") url = `https://shopbuddies.de/cashback/search?query=${encodeURIComponent(shopName)}`;
-                    else if (text === "Klarna") url = `https://www.klarna.com/de/store/?search=${encodeURIComponent(shopName).replace(/%20/g, '+')}`;
+                    else if (text === "iGraal") url = `https://de.igraal.com/search/results?term=${encodeURIComponent(searchShopName)}`;
+                    else if (text === "Opera Cashback") url = `https://www.google.com/search?q=site%3Acashback.opera.com%2Fde%2Fshops+${encodeURIComponent(searchShopName)}&btnI=I`;
+                    else if (text === "WEB.Cent") url = `https://shopping.web.de/webcent?q=${encodeURIComponent(searchShopName)}&comp=web_start_sf#.cbk.nav.suche`;
+                    else if (text === "Dealwise" || text === "Dealwise (ING)") url = `https://www.dealwise.de/results/${encodeURIComponent(searchShopName)}`;
+                    else if (text === "Shopbuddies") url = `https://shopbuddies.de/cashback/search?query=${encodeURIComponent(searchShopName)}`;
+                    else if (text === "Klarna") url = `https://www.klarna.com/de/store/?search=${encodeURIComponent(searchShopName).replace(/%20/g, '+')}`;
                     else if (text === "TopCashback" && (item.previousElementSibling && item.previousElementSibling.textContent.trim().toLowerCase().includes("gutscheine"))) url = "https://www.topcashback.de/EarnCashback.aspx?mpurl=topcashback-geschenkkarten";
                     else if (directLinks[text]) url = directLinks[text];
-                    else if (googleLuckyDomains[text]) url = `https://www.google.com/search?q=site%3A${googleLuckyDomains[text]}+${encodeURIComponent(shopName)}&btnI=I`;
+                    else if (googleLuckyDomains[text]) url = `https://www.google.com/search?q=site%3A${googleLuckyDomains[text]}+${encodeURIComponent(searchShopName)}&btnI=I`;
 
                     if (url) item.innerHTML = `<a href="${url}" target="_blank" style="${linkStyle}">${text}</a>`;
                 });
