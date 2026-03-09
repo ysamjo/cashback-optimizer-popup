@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Cashback-Optimizer Suite
+// @name         Cashback-Optimizer Suite (v4.97 - Cadooz & Studentbeans Restore)
 // @namespace    http://tampermonkey.net/
-// @version      5.0
-// @description  Popup und Verlinkungen für Cashback-Optimizer.de
+// @version      5.01
+// @description  RESTORED: Cadooz (MyDealz/Sparwelt), Studentbeans. Plus WG, GG, BC, Vip District, TCB Fix.
 // @author       ruler
 // @match        *://*/*
 // @grant        GM_xmlhttpRequest
@@ -16,7 +16,7 @@
     'use strict';
 
     const MAIN_DOMAIN = "cashback-optimizer.de";
-    const CB_PREFIX = "";
+    const CB_PREFIX = "l-bank";
     const ICON_URL = `https://${MAIN_DOMAIN}/favicons/favicon.svg`;
     const CSP_SITES = ['rossmann.de', 'lidl.de', 'apple.com', 'tesla.com', 'google.'];
 
@@ -162,7 +162,7 @@
 
     function runPopup() {
         // EXCLUSION-LOGIK: Verhindert Popups auf Preisportalen & Suchmaschinen
-if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de"].some(d => location.href.includes(d))) return;
+if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.", "kleinanzeigen.de", "amazon.de", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de"].some(d => location.href.includes(d))) return;
 
         getShopNames().then(names => {
             const host = location.hostname.toLowerCase();
