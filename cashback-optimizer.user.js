@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Cashback-Optimizer Suite (v4.97 - Cadooz & Studentbeans Restore)
+// @name         Cashback-Optimizer Popup
 // @namespace    http://tampermonkey.net/
-// @version      5.01
-// @description  RESTORED: Cadooz (MyDealz/Sparwelt), Studentbeans. Plus WG, GG, BC, Vip District, TCB Fix.
+// @version      5.10
+// @description  Verlinkt die Seite und bindet bei teilnehmenden Shops ein Popup ein.
 // @author       ruler
 // @match        *://*/*
 // @grant        GM_xmlhttpRequest
@@ -25,7 +25,7 @@
     function normalize(s) { return s ? s.toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss').replace(/[^a-z0-9]/g,'') : ''; }
 
     // ==========================================
-    // 1. MASTER DATENBANK (v4.97 - COMPLETE)
+    // 1. MASTER DATENBANK (v5.10 - FULL RESTORE)
     // ==========================================
     const directLinks = {
         "Benefit Buddy": "https://www.benefitbuddy.de/",
@@ -55,12 +55,8 @@
         "BestChoice Premium": "https://premium-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&locale=default&sortBy=alpha&ptg=vou",
         "BestChoice Aktion": "https://bc-aktion-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&locale=default&sortBy=alpha&ptg=vou",
         "BestChoice Plus": "https://plus-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&locale=default&sortBy=alpha&ptg=vou",
-        "BestChoice Birthday & Party": "https://birthday-party-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Style & Beauty": "https://style-beauty-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
-        "BestChoice Fit & Healthy": "https://fit-healthy-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
-        "BestChoice Drive & Ride": "https://drive-ride-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice DIY & Garden": "https://diy-garden-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
-        "BestChoice Food & Drinks": "https://food-drinks-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Home & Living": "https://home-living-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Tech & Media": "https://tech-media-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Travel & Adventure": "https://travel-adventure-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
@@ -89,25 +85,51 @@
     };
 
     // ==========================================
-    // 2. LINK ENRICHER (ROBUST DATA v4.97)
+    // 2. MODUL: LINK ENRICHER (INTERNAL & EXTERNAL)
     // ==========================================
     function runLinker() {
-   // MASTER-SCROLL (SOFORT-SPRUNG DESKTOP)
-    if (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const filterTerm = urlParams.get('filter');
-        if (filterTerm) {
-            const target = Array.from(document.querySelectorAll('.shop-area-header.filter-tag, .voucher-area-header.filter-tag, .item-name'))
-                              .find(el => el.textContent.toLowerCase().includes(filterTerm.toLowerCase()));
-            if (target) {
-                const y = target.getBoundingClientRect().top + window.pageYOffset - 70;
-                window.scrollTo({top: y, behavior: 'auto'}); // 'auto' für sofortigen Sprung ohne Animation
+        // A) MASTER-SCROLL (NUR DESKTOP MIT DELAY)
+        if (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+            const filterTerm = new URLSearchParams(window.location.search).get('filter');
+            if (filterTerm) {
+                setTimeout(() => {
+                    const target = Array.from(document.querySelectorAll('.shop-area-header.filter-tag, .voucher-area-header.filter-tag, .item-name'))
+                                      .find(el => el.textContent.toLowerCase().includes(filterTerm.toLowerCase()));
+                    if (target) {
+                        const y = target.getBoundingClientRect().top + window.pageYOffset - 70;
+                        window.scrollTo({top: y, behavior: 'auto'});
+                    }
+                }, 500);
             }
         }
-    }
+
+        // B) ENRICHER LOGIK
         const enrich = () => {
             document.querySelectorAll('.shop-area-header.filter-tag, .voucher-area-header.filter-tag, .item-name').forEach(el => {
-                if (el.querySelector('a')) return;
+                if (el.querySelector('a.optimizer-link')) return;
+
+                // 1. BUBBLE-SUPPORT (Internes onclick erben)
+                const bubble = el.querySelector('.discountBanner');
+                if (bubble) {
+                    const bubbleAction = bubble.getAttribute('onclick');
+                    if (bubbleAction) {
+                        el.innerHTML = `<a href="javascript:void(0)" onclick="${bubbleAction}" class="optimizer-link" style="color:inherit !important; text-decoration:none !important; border-bottom:1px dotted gray !important;">${el.innerHTML}</a>`;
+                        return;
+                    }
+                }
+
+                // 2. SEKTIONS-ERKENNUNG (Gutscheine vs Cashback)
+                let isVoucherSection = false;
+                let prev = el.previousElementSibling;
+                while (prev) {
+                    if (prev.classList.contains('type-area')) {
+                        if (prev.textContent.trim() === "Gutscheine") isVoucherSection = true;
+                        break;
+                    }
+                    prev = prev.previousElementSibling;
+                }
+
+                // 3. EXTERNE LINK-LOGIK
                 const text = el.textContent.trim();
                 const isHeader = el.classList.contains('filter-tag');
                 const shopArea = el.closest('.shop-area, .voucher-area');
@@ -117,30 +139,39 @@
                 let url = (isHeader ? bcLinks[text] : null) || directLinks[text];
 
                 if (!url) {
-                    if (text === "Penny Kartenwelt") url = `https://kartenwelt.penny.de/catalogsearch/result/?q=${encodeURIComponent(searchName)}`;
-                    else if (text === "REWE Kartenwelt") url = `https://kartenwelt.rewe.de/catalogsearch/result/?q=${encodeURIComponent(searchName)}`;
-                    else if (text === "Shopbuddies") url = `https://shopbuddies.de/cashback/search?query=${encodeURIComponent(searchName)}`;
-                    else if (text.includes("Dealwise")) url = `https://www.dealwise.de/results/${encodeURIComponent(searchName)}`;
-
-                    else if (text === "TopCashback") {
-                        if (el.closest('.voucher-area')) url = "https://www.topcashback.de/EarnCashback.aspx?mpurl=topcashback-geschenkkarten";
-                        else url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+site:topcashback.de`;
+                    // Sektions-abhängig: Shopbuddies & TCB
+                    if (text === "Shopbuddies") {
+                        url = isVoucherSection ? `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+site:shopbuddies.de/giftcards-shop/products`
+                                               : `https://www.shopbuddies.de/cashback/search?query=${encodeURIComponent(searchName)}`;
                     }
-                    else if (text === "Payback") url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+site:payback.de/shop`;
-                    else if (text === "iGraal") url = `https://de.igraal.com/search/results?term=${encodeURIComponent(searchName)}`;
-                    else if (text === "Opera Cashback") url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+site:cashback.opera.com/de/shops`;
-                    else if (text === "WEB.Cent") url = `https://shopping.web.de/webcent?q=${encodeURIComponent(searchName)}`;
+                    else if (text === "TopCashback") {
+                        url = isVoucherSection ? "https://www.topcashback.de/EarnCashback.aspx?mpurl=topcashback-geschenkkarten"
+                                               : `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+site:topcashback.de`;
+                    }
+                    // Spezial-Suchen
+                    else if (text.includes("Dealwise")) url = `https://www.dealwise.de/results/${encodeURIComponent(searchName)}`;
                     else if (text === "Klarna") url = `https://www.klarna.com/de/store/?search=${encodeURIComponent(searchName)}`;
+                    else if (text === "iGraal") url = `https://de.igraal.com/search/results?term=${encodeURIComponent(searchName)}`;
+                    else if (text === "WEB.Cent") url = `https://shopping.web.de/webcent?q=${encodeURIComponent(searchName)}`;
+                    else if (text === "Opera Cashback") url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+site:cashback.opera.com/de/shops`;
+
+                    // Kartenwelten & Fallbacks
+                    else if (text === "Penny Kartenwelt") url = `https://kartenwelt.penny.de/catalogsearch/result/?q=${encodeURIComponent(searchName)}`;
+                    else if (text === "REWE Kartenwelt") url = `https://kartenwelt.rewe.de/catalogsearch/result/?q=${encodeURIComponent(searchName)}`;
+                    else if (text === "Payback") url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+site:payback.de/shop`;
                     else if (luckyDomains[text]) url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+site:${luckyDomains[text]}`;
                 }
-                if (url) el.innerHTML = `<a href="${url}" target="_blank" rel="noreferrer" referrerpolicy="no-referrer" style="color:inherit !important; text-decoration:none !important; border-bottom:1px dotted gray !important;">${text}</a>`;
+
+                if (url) {
+                    el.innerHTML = `<a href="${url}" target="_blank" rel="noreferrer" class="optimizer-link" referrerpolicy="no-referrer" style="color:inherit !important; text-decoration:none !important; border-bottom:1px dotted gray !important;">${el.innerHTML}</a>`;
+                }
             });
         };
-        setInterval(enrich, 500);
+        setInterval(enrich, 800);
     }
 
     // ==========================================
-    // 3. POPUP MODULE (SAFE AREA & TITLE RESTORE)
+    // 3. MODUL: POPUP (SMOOTH UI & CLICK OUTSIDE)
     // ==========================================
     async function getShopNames() {
         const CACHE_KEY = "names", TIME_KEY = "time", LIFE = 86400000;
@@ -161,8 +192,8 @@
     }
 
     function runPopup() {
-        // EXCLUSION-LOGIK: Verhindert Popups auf Preisportalen & Suchmaschinen
-if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.", "kleinanzeigen.de", "amazon.de", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de"].some(d => location.href.includes(d))) return;
+        // EXCLUSIONS
+        if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "amazon.de"].some(d => location.href.includes(d))) return;
 
         getShopNames().then(names => {
             const host = location.hostname.toLowerCase();
@@ -185,13 +216,16 @@ if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.
             const id = "cb_" + Math.random().toString(36).substr(2, 5);
             const filterUrl = `https://${MAIN_DOMAIN}/?filter=${encodeURIComponent(shop)}`;
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            const headerH = "50px";
 
-            const desktopInitStyle = `width: 260px; height: 54px; right: 20px; bottom: 20px; border-radius: 14px;`;
-            const mobileInitStyle = `width: 56px; height: 56px; right: 20px; bottom: 85px; border-radius: 50%;`;
+            // SMOOTH TRANSITION STYLES
+            const transition = "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)";
+            const desktopInitStyle = `width: 260px; height: ${headerH}; right: 20px; bottom: 20px; border-radius: 14px; will-change: width, height;`;
+            const mobileInitStyle = `width: 56px; height: 56px; right: 20px; bottom: 85px; border-radius: 50%; will-change: width, height, transform;`;
 
             const html = `
-                <div id="${id}" style="position:fixed !important; z-index:2147483647 !important; font-family:-apple-system,BlinkMacSystemFont,sans-serif !important; transition: all 0.3s ease; ${isMobile ? mobileInitStyle : desktopInitStyle} overflow:hidden; background:#fffbe7; border:1px solid #e0c200; box-shadow:0 4px 20px rgba(0,0,0,0.3); display:flex; flex-direction:column;">
-                    <div id="${id}_h" style="display:flex; align-items:center; height:54px; min-height:54px; padding:0 14px; cursor:pointer; justify-content:center; flex-shrink:0;">
+                <div id="${id}" style="position:fixed !important; z-index:2147483647 !important; font-family:-apple-system,BlinkMacSystemFont,sans-serif !important; transition: ${transition}; ${isMobile ? mobileInitStyle : desktopInitStyle} overflow:hidden; background:#fffbe7; border:1px solid #e0c200; box-shadow:0 10px 30px rgba(0,0,0,0.2); display:flex; flex-direction:column; backface-visibility: hidden;">
+                    <div id="${id}_h" style="display:flex; align-items:center; height:${headerH}; min-height:${headerH}; padding:0 14px; cursor:pointer; justify-content:center; flex-shrink:0;">
                         <div id="${id}_icowrap" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                             <img id="${id}_i" src="${ICON_URL}" onerror="document.getElementById('${id}_fallback').style.display='block'; this.style.display='none'; document.getElementById('${id}').setAttribute('csp','1');" style="width:26px; height:26px;">
                             <span id="${id}_fallback" style="display:none; font-weight:900; color:#b1a100; font-size:16px;">CO</span>
@@ -199,7 +233,7 @@ if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.
                         <div id="${id}_t" style="flex:1; font-weight:700; color:#b1a100; font-size:15px !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-left:12px; ${isMobile ? 'display:none;' : ''}">${shop} Cashback</div>
                         <div id="${id}_x" style="font-size:28px; color:#b1a100; padding-left:10px; line-height:1; ${isMobile ? 'display:none;' : ''}">×</div>
                     </div>
-                    <iframe id="${id}_f" src="${filterUrl}" style="display:none; width:100%; height:calc(100% - 54px); border:none; background:transparent;"></iframe>
+                    <iframe id="${id}_f" src="${filterUrl}" style="opacity:0; pointer-events:none; transition: opacity 0.3s ease; width:100%; height:calc(100% - ${headerH}); border:none; background:transparent;"></iframe>
                 </div>
             `;
 
@@ -208,6 +242,24 @@ if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.
             const frame = document.getElementById(`${id}_f`);
             const label = document.getElementById(`${id}_t`);
             const closeX = document.getElementById(`${id}_x`);
+
+            const minimize = () => {
+                frame.style.opacity = "0";
+                frame.style.pointerEvents = "none";
+                setTimeout(() => {
+                    if (isMobile) {
+                        label.style.display = "none"; closeX.style.display = "none";
+                        wrap.style.cssText = `position:fixed !important; z-index:2147483647 !important; ${mobileInitStyle} background:#fffbe7; border:1px solid #e0c200;`;
+                    } else {
+                        wrap.style.width = "260px"; wrap.style.height = headerH;
+                    }
+                }, 50);
+            };
+
+            // CLICK-OUTSIDE
+            document.addEventListener('mousedown', (e) => {
+                if (wrap && !wrap.contains(e.target) && frame.style.opacity === "1") minimize();
+            });
 
             if (CSP_SITES.some(s => host.includes(s))) {
                 wrap.setAttribute('csp', '1');
@@ -219,22 +271,21 @@ if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.
                 if (e.target.id === `${id}_x`) { wrap.remove(); return; }
                 if (wrap.getAttribute('csp') === '1') { window.open(filterUrl, '_blank'); return; }
 
-                if (frame.style.display === "none") {
-                    frame.style.display = "block"; label.style.display = "block"; closeX.style.display = "block";
+                if (frame.style.opacity === "0") {
                     if (isMobile) {
                         wrap.style.cssText += "width:100vw !important; height:calc(100vh - env(safe-area-inset-top, 20px)) !important; top:env(safe-area-inset-top, 20px) !important; bottom:0 !important; right:0 !important; border-radius:0 !important;";
+                    } else {
+                        wrap.style.width = "420px"; wrap.style.height = "450px";
                     }
-                    else { wrap.style.width = "420px"; wrap.style.height = "380px"; }
+                    setTimeout(() => {
+                        frame.style.opacity = "1";
+                        frame.style.pointerEvents = "auto";
+                        label.style.display = "block";
+                        closeX.style.display = "block";
+                    }, 100);
                 } else {
                     if (e.target.id === `${id}_t`) window.open(filterUrl, '_blank');
-                    else {
-                        frame.style.display = "none";
-                        if (isMobile) {
-                            label.style.display = "none"; closeX.style.display = "none";
-                            wrap.style.cssText = `position:fixed !important; z-index:2147483647 !important; ${mobileInitStyle} background:#fffbe7; border:1px solid #e0c200;`;
-                        }
-                        else { wrap.style.width = "260px"; wrap.style.height = "54px"; }
-                    }
+                    else minimize();
                 }
             };
         });
