@@ -5,7 +5,7 @@ Ein kompaktes Userscript, das dir automatisch anzeigt, ob es für den aktuellen 
 ## Features
 - 🔍 **Direktsuche:** Ein Klick öffnet die passenden Ergebnisse auf Cashback-Optimizer.de.
 - 🚀 **Automatische Erkennung:** Erkennt hunderte Shops basierend auf der URL.
-- 🔗 **Verlinkung:** Verlinkt direkt auf die spezifische Cashback-Unterseite oder nutzt optimierte DuckDuckGo Lucky Searches (!ducky) für maximale Trefferquoten.
+- 🔗 **Verlinkung:** Verlinkt direkt auf die spezifische Cashback-Unterseite oder nutzt optimierte DuckDuckGo Lucky Searches für maximale Trefferquoten.
 - ⚡ **Performance:** Nutzt lokales Caching, um keine unnötigen Netzwerkanfragen zu stellen.
 - 📱 **Mobile Optimized:** Spezielle UI-Anpassungen für iPhone/Android inkl. Safe-Area-Support und optimierter Schriftgröße (15px).
 
