@@ -79,7 +79,7 @@
         "Gutscheingold Home": "https://www.gutscheingold.de/home/#einloesepartner",
         "Gutscheingold Entertainment": "https://www.gutscheingold.de/entertainment/#einloesepartner",
         "Fashioncheque": "https://www.fashioncheque.com/de-de/shopfinder",
-        "EveryWish": "https://www.every-wish.com/de/einloesepartner"
+        "EveryWish": "https://app.everywish.de/#:~:text=Suchen-,Top%20Auswahl,-%E2%80%B9"
     };
 
     const luckyDomains = {
