@@ -194,7 +194,7 @@
     }
 
     function runPopup() {
-        if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "plus.rtl.de/video-tv", "duckduckgo.", "netflix.com/watch", "youtube.", "https://www.amazon.de/gp/video", "disneyplus.com", "kleinanzeigen.de", "amazon.de", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de"].some(d => location.href.includes(d))) return;
+        if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "ebay.", "plus.rtl.de/video-tv", "duckduckgo.", "netflix.com/watch", "youtube.", "https://www.amazon.de/gp/video", "disneyplus.com", "kleinanzeigen.de", "amazon.de", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de"].some(d => location.href.includes(d))) return;
 
         getShopNames().then(names => {
             const host = location.hostname.toLowerCase();
