@@ -18,7 +18,7 @@
     const MAIN_DOMAIN = "cashback-optimizer.de";
     const CB_PREFIX = "";
     const ICON_URL = `https://${MAIN_DOMAIN}/favicons/favicon.svg`;
-    const CSP_SITES = ['rossmann.de', 'lidl.de', 'tesla.com', 'google.', 'mydealz.de', 'facebook.com'];
+    const CSP_SITES = ['rossmann.de', 'lidl.de', 'tesla.com'];
 
     function setStorage(k,v){ try{GM_setValue(k,v)}catch(e){localStorage.setItem('cb_'+k,v)} }
     function getStorage(k){ try{let r=GM_getValue(k); return r!==undefined?r:localStorage.getItem('cb_'+k)}catch(e){return localStorage.getItem('cb_'+k)} }
@@ -194,7 +194,7 @@
     }
 
     function runPopup() {
-        if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.", "netflix.com/watch", "youtube.", "https://www.amazon.de/gp/video", "disneyplus.com", "kleinanzeigen.de", "amazon.de", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de"].some(d => location.href.includes(d))) return;
+        if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "plus.rtl.de/video-tv", "duckduckgo.", "netflix.com/watch", "youtube.", "https://www.amazon.de/gp/video", "disneyplus.com", "kleinanzeigen.de", "amazon.de", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de"].some(d => location.href.includes(d))) return;
 
         getShopNames().then(names => {
             const host = location.hostname.toLowerCase();
