@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Cashback-Optimizer Suite
 // @namespace    http://tampermonkey.net/
-// @version      5.11
-// @description  Restored all BestChoice catalogs. Dynamic Search for Benefits.me & CB. Mobile Center Fix.
+// @version      5.17
+// @description  
 // @author       ruler
 // @match        *://*/*
 // @grant        GM_xmlhttpRequest
@@ -18,14 +18,14 @@
     const MAIN_DOMAIN = "cashback-optimizer.de";
     const CB_PREFIX = "";
     const ICON_URL = `https://${MAIN_DOMAIN}/favicons/favicon.svg`;
-    const CSP_SITES = ['rossmann.de', 'lidl.de', 'tesla.com'];
+    const CSP_SITES = ['rossmann.de', 'lidl.de'];
 
     function setStorage(k,v){ try{GM_setValue(k,v)}catch(e){localStorage.setItem('cb_'+k,v)} }
     function getStorage(k){ try{let r=GM_getValue(k); return r!==undefined?r:localStorage.getItem('cb_'+k)}catch(e){return localStorage.getItem('cb_'+k)} }
     function normalize(s) { return s ? s.toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss').replace(/[^a-z0-9]/g,'') : ''; }
 
     // ==========================================
-    // 1. MASTER DATENBANK (v5.15 - RESTORED)
+    // 1. MASTER DATENBANK (v5.17)
     // ==========================================
     const directLinks = {
         "Benefit Buddy": "https://www.benefitbuddy.de/",
@@ -49,11 +49,11 @@
     };
 
     const bcLinks = {
-        "BestChoice Classic": "https://ace-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
+        "BestChoice Classic": "https://bestchoice-ace-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&locale=default&sortBy=alpha&ptg=vou",
         "BestChoice Premium": "https://premium-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&locale=default&sortBy=alpha&ptg=vou",
         "BestChoice Aktion": "https://bc-aktion-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&locale=default&sortBy=alpha&ptg=vou",
         "BestChoice Plus": "https://plus-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&locale=default&sortBy=alpha&ptg=vou",
-        "BestChoice BenefitBuddy": "https://bestchoice-ace-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
+        "BestChoice BenefitBuddy": "https://www.benefitbuddy.de/",
         "BestChoice Birthday & Party": "https://birthday-party-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Style & Beauty": "https://style-beauty-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Fit & Healthy": "https://fit-healthy-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
@@ -63,7 +63,7 @@
         "BestChoice Home & Living": "https://home-living-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Tech & Media": "https://tech-media-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Travel & Adventure": "https://travel-adventure-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
-        "Wunschgutschein": "https://www.wunschgutschein.de/pages/beliebtesten-einloesepartner",
+    "Wunschgutschein": "https://www.wunschgutschein.de/pages/beliebtesten-einloesepartner",
         "Wunschgutschein Beauty": "https://app.wunschgutschein.de/beauty#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
         "Wunschgutschein Home & Living": "https://app.wunschgutschein.de/homeandliving#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
         "Wunschgutschein Fashion": "https://app.wunschgutschein.de/fashion#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
@@ -137,7 +137,10 @@
                 let url = (isHeader ? bcLinks[text] : null) || directLinks[text];
 
                 if (!url) {
-                    if (text === "Corporate Benefits") {
+                    if (text === "Newsletter") {
+    url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+Newsletter`;
+}
+                    else if (text === "Corporate Benefits") {
                         const domain = CB_PREFIX ? `${CB_PREFIX}.mitarbeiterangebote.de` : "mitarbeiterangebote.de";
                         url = `https://${domain}/search?s=${encodeURIComponent(searchName)}`;
                     }
@@ -173,7 +176,7 @@
     }
 
     // ==========================================
-    // 3. MODUL: POPUP (CSP-FIXED & MOBILE CENTER)
+    // 3. MODUL: POPUP (PRECISE HOST-MATCHING)
     // ==========================================
     function getShopNames() {
         const CACHE_KEY = "names", TIME_KEY = "time", LIFE = 86400000;
@@ -194,23 +197,27 @@
     }
 
     function runPopup() {
-        if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "ebay.", "plus.rtl.de/video-tv", "duckduckgo.", "netflix.com/watch", "youtube.", "https://www.amazon.de/gp/video", "disneyplus.com", "kleinanzeigen.de", "amazon.de", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de"].some(d => location.href.includes(d))) return;
+        // EXCLUSIONS
+        if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.", "kleinanzeigen.de", "amazon.de", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de"].some(d => location.href.includes(d))) return;
 
         getShopNames().then(names => {
             const host = location.hostname.toLowerCase();
-            const pageTitle = normalize(document.title);
             let shop = null;
 
+            // 1. MANUELLE OVERRIDES (v5.17)
             if (host.includes('netto-online.de')) shop = "Netto MD";
             else if (host.includes('baur.de')) shop = "Baur";
             else if (host.includes('g-star.com')) shop = "G-Star RAW";
             else if (host.includes('otto.de')) shop = "Otto";
 
+            // 2. PRÄZISES HOSTNAME-MATCHING (Kein Title-Matching mehr!)
             if (!shop && names.length > 0) {
-                const segs = host.split('.').filter(s => !['www','de','com','net','shop','online'].includes(s));
-                for (const s of segs) { shop = names.find(n => normalize(n) === normalize(s)); if (shop) break; }
+                const segs = host.split('.').filter(s => !['www','de','com','net','shop','online','at','ch'].includes(s));
+                for (const s of segs) {
+                    shop = names.find(n => normalize(n) === normalize(s));
+                    if (shop) break;
+                }
             }
-            if (!shop && names.length > 0) shop = names.find(n => normalize(n).length > 3 && pageTitle.includes(normalize(n)));
 
             if (!shop) return;
 
@@ -224,14 +231,14 @@
             const mobileInitStyle = `width: 56px; height: 56px; right: 20px; bottom: 85px; border-radius: 50%; will-change: width, height, transform;`;
 
             const html = `
-                <div id="${id}" style="position:fixed !important; z-index:2147483647 !important; font-family:-apple-system,BlinkMacSystemFont,sans-serif !important; transition: ${transition}; ${isMobile ? mobileInitStyle : desktopInitStyle} overflow:hidden; background:#fffbe7; border:1px solid #e0c200; box-shadow:0 10px 30px rgba(0,0,0,0.2); display:flex; flex-direction:column; backface-visibility: hidden;">
-                    <div id="${id}_h" style="display:flex; align-items:center; justify-content:center; height:${isMobile ? '100%' : headerH}; min-height:${isMobile ? '56px' : headerH}; padding:${isMobile ? '0' : '0 14px'}; cursor:pointer; flex-shrink:0;">
-                        <div id="${id}_icowrap" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative;">
+                <div id="${id}" style="position:fixed !important; z-index:2147483647 !important; font-family:-apple-system,BlinkMacSystemFont,sans-serif !important; transition: ${transition}; ${isMobile ? mobileInitStyle : desktopInitStyle} overflow:hidden; background:#fffbe7; border:1px solid #e0c200; box-shadow:0 10px 30px rgba(0,0,0,0.2); display:flex; flex-direction:column; backface-visibility: hidden; box-sizing: border-box !important;">
+                    <div id="${id}_h" style="display:flex; align-items:center; justify-content:center; height:${isMobile ? '100%' : headerH}; min-height:${isMobile ? '56px' : headerH}; padding:${isMobile ? '0' : '0 14px'}; cursor:pointer; flex-shrink:0; box-sizing: border-box !important;">
+                        <div id="${id}_icowrap" style="width:26px; height:50px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative;">
                             <img id="${id}_i" src="${ICON_URL}" style="width:26px; height:26px; display:none; z-index:2;">
-                            <span id="${id}_fallback" style="display:block; font-weight:900; color:#b1a100; font-size:14px; z-index:1;">CO</span>
+                            <span id="${id}_fallback" style="display:block; font-weight:900; color:#b1a100; font-size:14px; z-index:1; line-height:50px;">CO</span>
                         </div>
-                        <div id="${id}_t" style="flex:1; font-weight:700; color:#b1a100; font-size:15px !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-left:12px; display:none;">${shop} Cashback</div>
-                        <div id="${id}_x" style="font-size:28px; color:#b1a100; padding-left:10px; line-height:1; display:none;">×</div>
+                        <div id="${id}_t" style="flex:1; font-weight:700; color:#b1a100; font-size:15px !important; line-height:50px !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-left:12px; display:none; -webkit-font-smoothing: antialiased;">${shop} Cashback</div>
+                        <div id="${id}_x" style="font-size:28px; color:#b1a100; padding-left:10px; line-height:50px !important; display:none;">×</div>
                     </div>
                     <iframe id="${id}_f" src="${filterUrl}" style="opacity:0; pointer-events:none; transition: opacity 0.3s ease; width:100%; height:calc(100% - ${headerH}); border:none; background:transparent;"></iframe>
                 </div>
