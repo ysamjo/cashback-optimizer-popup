@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Cashback-Optimizer Suite
 // @namespace    http://tampermonkey.net/
-// @version      5.17
+// @version      5.2
 // @description  
 // @author       ruler
 // @match        *://*/*
@@ -16,7 +16,7 @@
     'use strict';
 
     const MAIN_DOMAIN = "cashback-optimizer.de";
-    const CB_PREFIX = "";
+    const CB_PREFIX = "l-bank";
     const ICON_URL = `https://${MAIN_DOMAIN}/favicons/favicon.svg`;
     const CSP_SITES = ['rossmann.de', 'lidl.de'];
 
