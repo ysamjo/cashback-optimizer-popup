@@ -16,7 +16,7 @@
     'use strict';
 
     const MAIN_DOMAIN = "cashback-optimizer.de";
-    const CB_PREFIX = "l-bank";
+    const CB_PREFIX = "";
     const ICON_URL = `https://${MAIN_DOMAIN}/favicons/favicon.svg`;
     const CSP_SITES = ['rossmann.de', 'lidl.de'];
 
