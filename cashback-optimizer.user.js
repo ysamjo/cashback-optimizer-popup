@@ -31,6 +31,7 @@
         "Benefit Buddy": "https://www.benefitbuddy.de/",
         "Hanseatic Vorteilswelt": "https://meine.hanseaticbank.de/?redirect=voucherPortal",
         "Vip District / MIVO": "https://mitarbeitervorteile.de/",
+        "Geschenkkartenwelt.de": "https://www.geschenkkartenwelt.de",
         "O2 Priority": "https://www.o2online.de/priority/vorteile/priority-vorteilswelt",
         "Cadooz (MyDealz)": "https://www.mydealz.de/deals/mydealz-cadooz-vorteilswelt-jetzt-fur-alle-zb-bestchoice-classic-50eur-5eur-i-adidas-12-cyberport-4-eterna-15-lieferando-5-etc-2353520",
         "Cadooz (Sparwelt)": "https://www.sparwelt.de/themenwelten/sparwelt-vorteilswelt",
