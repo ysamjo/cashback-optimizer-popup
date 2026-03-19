@@ -199,7 +199,7 @@
 
     function runPopup() {
         // EXCLUSIONS
-        if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.", "kleinanzeigen.de", "amazon.de", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de", "netflix.com/watch", "ebay.de"].some(d => location.href.includes(d))) return;
+        if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.", "kleinanzeigen.de", "amazon.", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de", "netflix.com/watch", "ebay."].some(d => location.href.includes(d))) return;
 
         getShopNames().then(names => {
             const host = location.hostname.toLowerCase();
