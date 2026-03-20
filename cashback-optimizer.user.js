@@ -1,22 +1,26 @@
 // ==UserScript==
-// @name         Cashback-Optimizer Suite
-// @namespace    http://tampermonkey.net/
-// @version      5.2
-// @description  Cashback-Optimizer auf Shop-Seiten mit Verlinkungen
-// @author       ruler
-// @match        *://*/*
-// @grant        GM_xmlhttpRequest
-// @grant        GM_setValue
-// @grant        GM_getValue
-// @run-at       document-end
-// @allFrames    true
+// @name          Cashback-Optimizer Suite
+// @namespace     http://tampermonkey.net/
+// @version       5.27
+// @description
+// @author        ruler
+// @match         *://*/*
+// @grant         GM_xmlhttpRequest
+// @grant         GM_setValue
+// @grant         GM_getValue
+// @run-at        document-end
+// @allFrames     true
 // ==/UserScript==
 
 (function() {
     'use strict';
 
-    const MAIN_DOMAIN = "cashback-optimizer.de";
+    // --- KONFIGURATION ---
+    const ENABLE_LINK_ENRICHER = true;
     const CB_PREFIX = "";
+    const MAIN_DOMAIN = "cashback-optimizer.de";
+    // ---------------------
+
     const ICON_URL = `https://${MAIN_DOMAIN}/favicons/favicon.svg`;
     const CSP_SITES = ['rossmann.de', 'lidl.de'];
 
@@ -24,15 +28,19 @@
     function getStorage(k){ try{let r=GM_getValue(k); return r!==undefined?r:localStorage.getItem('cb_'+k)}catch(e){return localStorage.getItem('cb_'+k)} }
     function normalize(s) { return s ? s.toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss').replace(/[^a-z0-9]/g,'') : ''; }
 
+    function findLink(obj, val) {
+        const normVal = normalize(val);
+        const key = Object.keys(obj).find(k => normalize(k) === normVal);
+        return key ? obj[key] : null;
+    }
+
     // ==========================================
-    // 1. MASTER DATENBANK (v5.17)
+    // 1. MASTER DATENBANK (v5.27 - FULL RESTORE)
     // ==========================================
     const directLinks = {
         "Benefit Buddy": "https://www.benefitbuddy.de/",
         "Hanseatic Vorteilswelt": "https://meine.hanseaticbank.de/?redirect=voucherPortal",
         "Vip District / MIVO": "https://mitarbeitervorteile.de/",
-        "Payback Gutscheine": "https://www.payback.de/coupons?partnerId=lp741",
-        "Geschenkkartenwelt.de": "https://www.geschenkkartenwelt.de",
         "O2 Priority": "https://www.o2online.de/priority/vorteile/priority-vorteilswelt",
         "Cadooz (MyDealz)": "https://www.mydealz.de/deals/mydealz-cadooz-vorteilswelt-jetzt-fur-alle-zb-bestchoice-classic-50eur-5eur-i-adidas-12-cyberport-4-eterna-15-lieferando-5-etc-2353520",
         "Cadooz (Sparwelt)": "https://www.sparwelt.de/themenwelten/sparwelt-vorteilswelt",
@@ -40,22 +48,25 @@
         "Sovendus": `https://${MAIN_DOMAIN}/sovendus/`,
         "Allianz Vorteilswelt": "https://vorteile.allianz.de/einkaufsvorteile",
         "AmEx Offers": "https://m.amex/amexofferslp2024",
+        "benefitforme": CB_PREFIX ? `https://${CB_PREFIX}.meinebenefits.de/` : "https://meinebenefits.de/",
         "Miles & More": "https://www.miles-and-more.com/de/de/earn/shopping/shopping-platform.html?l=de",
+        "Payback Gutscheine": "https://www.payback.de/coupons?partnerId=lp741",
         "Payback Prämienshop": "https://www.payback.de/praemien/kategorie/gutscheine",
+        "Geschenkkartenwelt.de": "https://www.geschenkkartenwelt.de/",
         "Netto Kartenwelt": "https://www.netto-online.de/geschenk-gutscheinkarten/",
         "Marktkauf Kartenwelt": "https://www.marktkauf.de/geschenk-gutscheinkarten/kat-M0740",
         "MeinMagenta": "https://www.telekom.de/magenta-moments",
         "Samsung Members": "https://www.samsung.com/de/apps/samsung-members/",
-        "EveryWish": "https://www.every-wish.com/de/einloesepartner",
+        "EveryWish": "https://app.everywish.de/#:~:text=Suchen-,Top%20Auswahl,-%E2%80%B9",
         "Fashioncheque": "https://www.fashioncheque.com/de-de/shopfinder"
     };
 
     const bcLinks = {
-        "BestChoice Classic": "https://bestchoice-ace-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&locale=default&sortBy=alpha&ptg=vou",
+        "BestChoice Classic": "https://ace-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Premium": "https://premium-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&locale=default&sortBy=alpha&ptg=vou",
         "BestChoice Aktion": "https://bc-aktion-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&locale=default&sortBy=alpha&ptg=vou",
         "BestChoice Plus": "https://plus-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&locale=default&sortBy=alpha&ptg=vou",
-        "BestChoice BenefitBuddy": "https://www.benefitbuddy.de/",
+        "BestChoice BenefitBuddy": "https://bestchoice-ace-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Birthday & Party": "https://birthday-party-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Style & Beauty": "https://style-beauty-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Fit & Healthy": "https://fit-healthy-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
@@ -65,7 +76,7 @@
         "BestChoice Home & Living": "https://home-living-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Tech & Media": "https://tech-media-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Travel & Adventure": "https://travel-adventure-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
-    "Wunschgutschein": "https://www.wunschgutschein.de/pages/beliebtesten-einloesepartner",
+        "Wunschgutschein": "https://www.wunschgutschein.de/pages/beliebtesten-einloesepartner",
         "Wunschgutschein Beauty": "https://app.wunschgutschein.de/beauty#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
         "Wunschgutschein Home & Living": "https://app.wunschgutschein.de/homeandliving#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
         "Wunschgutschein Fashion": "https://app.wunschgutschein.de/fashion#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
@@ -79,9 +90,7 @@
         "Gutscheingold Kids": "https://www.gutscheingold.de/kids/#einloesepartner",
         "Gutscheingold Fashion": "https://www.gutscheingold.de/fashion/#einloesepartner",
         "Gutscheingold Home": "https://www.gutscheingold.de/home/#einloesepartner",
-        "Gutscheingold Entertainment": "https://www.gutscheingold.de/entertainment/#einloesepartner",
-        "Fashioncheque": "https://www.fashioncheque.com/de-de/shopfinder",
-        "EveryWish": "https://app.everywish.de/#:~:text=Suchen-,Top%20Auswahl,-%E2%80%B9"
+        "Gutscheingold Entertainment": "https://www.gutscheingold.de/entertainment/#einloesepartner"
     };
 
     const luckyDomains = {
@@ -136,12 +145,12 @@
                 const rawName = shopArea?.querySelector('.filter-tag')?.textContent.replace(/<.*%/, '').trim() || "";
                 const searchName = (rawName === "Netto MD") ? "Netto" : rawName;
 
-                let url = (isHeader ? bcLinks[text] : null) || directLinks[text];
+                let url = (isHeader ? findLink(bcLinks, text) : null) || findLink(directLinks, text);
 
                 if (!url) {
                     if (text === "Newsletter") {
-    url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+Newsletter`;
-}
+                        url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+Newsletter`;
+                    }
                     else if (text === "Corporate Benefits") {
                         const domain = CB_PREFIX ? `${CB_PREFIX}.mitarbeiterangebote.de` : "mitarbeiterangebote.de";
                         url = `https://${domain}/search?s=${encodeURIComponent(searchName)}`;
@@ -166,11 +175,19 @@
                     else if (text === "Penny Kartenwelt") url = `https://kartenwelt.penny.de/catalogsearch/result/?q=${encodeURIComponent(searchName)}`;
                     else if (text === "REWE Kartenwelt") url = `https://kartenwelt.rewe.de/catalogsearch/result/?q=${encodeURIComponent(searchName)}`;
                     else if (text === "Payback") url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+site:payback.de/shop`;
-                    else if (luckyDomains[text]) url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+site:${luckyDomains[text]}`;
+                    else if (findLink(luckyDomains, text)) {
+                        const domain = findLink(luckyDomains, text);
+                        url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+site:${domain}`;
+                    }
+                }
+
+                if (!url && isVoucherSection) {
+                    url = `https://${MAIN_DOMAIN}/?filter=${encodeURIComponent(text)}`;
                 }
 
                 if (url) {
-                    el.innerHTML = `<a href="${url}" target="_blank" rel="noreferrer" class="optimizer-link" referrerpolicy="no-referrer" style="color:inherit !important; text-decoration:none !important; border-bottom:1px dotted gray !important;">${el.innerHTML}</a>`;
+                    const isInternal = url.includes(MAIN_DOMAIN);
+                    el.innerHTML = `<a href="${url}" target="${isInternal ? '_self' : '_blank'}" rel="noreferrer" class="optimizer-link" referrerpolicy="no-referrer" style="color:inherit !important; text-decoration:none !important; border-bottom:1px dotted gray !important;">${el.innerHTML}</a>`;
                 }
             });
         };
@@ -178,7 +195,7 @@
     }
 
     // ==========================================
-    // 3. MODUL: POPUP (PRECISE HOST-MATCHING)
+    // 3. MODUL: POPUP (UI-FIXED)
     // ==========================================
     function getShopNames() {
         const CACHE_KEY = "names", TIME_KEY = "time", LIFE = 86400000;
@@ -199,20 +216,17 @@
     }
 
     function runPopup() {
-        // EXCLUSIONS
-        if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.", "kleinanzeigen.de", "amazon.", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de", "netflix.com/watch", "ebay."].some(d => location.href.includes(d))) return;
+        if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.", "kleinanzeigen.de", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de", "amazon.", "netflix.com/watch", "ebay."].some(d => location.href.includes(d))) return;
 
         getShopNames().then(names => {
             const host = location.hostname.toLowerCase();
             let shop = null;
 
-            // 1. MANUELLE OVERRIDES (v5.17)
             if (host.includes('netto-online.de')) shop = "Netto MD";
             else if (host.includes('baur.de')) shop = "Baur";
             else if (host.includes('g-star.com')) shop = "G-Star RAW";
             else if (host.includes('otto.de')) shop = "Otto";
 
-            // 2. PRÄZISES HOSTNAME-MATCHING (Kein Title-Matching mehr!)
             if (!shop && names.length > 0) {
                 const segs = host.split('.').filter(s => !['www','de','com','net','shop','online','at','ch'].includes(s));
                 for (const s of segs) {
@@ -229,18 +243,19 @@
             const headerH = "50px";
 
             const transition = "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)";
-            const desktopInitStyle = `width: 260px; height: ${headerH}; right: 20px; bottom: 20px; border-radius: 14px; will-change: width, height;`;
-            const mobileInitStyle = `width: 56px; height: 56px; right: 20px; bottom: 85px; border-radius: 50%; will-change: width, height, transform;`;
+            const desktopInitStyle = `width: 260px; height: ${headerH}; right: 20px; bottom: 20px; border-radius: 14px;`;
+            const mobileInitStyle = `width: 56px; height: 56px; right: 20px; bottom: 85px; border-radius: 50%;`;
 
             const html = `
-                <div id="${id}" style="position:fixed !important; z-index:2147483647 !important; font-family:-apple-system,BlinkMacSystemFont,sans-serif !important; transition: ${transition}; ${isMobile ? mobileInitStyle : desktopInitStyle} overflow:hidden; background:#fffbe7; border:1px solid #e0c200; box-shadow:0 10px 30px rgba(0,0,0,0.2); display:flex; flex-direction:column; backface-visibility: hidden; box-sizing: border-box !important;">
-                    <div id="${id}_h" style="display:flex; align-items:center; justify-content:center; height:${isMobile ? '100%' : headerH}; min-height:${isMobile ? '56px' : headerH}; padding:${isMobile ? '0' : '0 14px'}; cursor:pointer; flex-shrink:0; box-sizing: border-box !important;">
+                <div id="${id}" style="position:fixed !important; z-index:2147483647 !important; opacity:0; pointer-events:none; font-family:-apple-system,BlinkMacSystemFont,sans-serif !important; transition: ${transition}, opacity 0.2s ease; ${isMobile ? mobileInitStyle : desktopInitStyle} overflow:hidden; background:#fffbe7; border:1px solid #e0c200; box-shadow:0 10px 30px rgba(0,0,0,0.2); display:flex; flex-direction:column; backface-visibility: hidden; box-sizing: border-box !important;">
+                    <div id="${id}_h" style="display:flex; align-items:center; justify-content:center; height:${isMobile ? '100%' : headerH}; min-height:${isMobile ? '56px' : headerH}; padding:${isMobile ? '0' : '0 14px'}; cursor:pointer; flex-shrink:0; box-sizing: border-box !important; position:relative;">
                         <div id="${id}_icowrap" style="width:26px; height:50px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative;">
                             <img id="${id}_i" src="${ICON_URL}" style="width:26px; height:26px; display:none; z-index:2;">
                             <span id="${id}_fallback" style="display:block; font-weight:900; color:#b1a100; font-size:14px; z-index:1; line-height:50px;">CO</span>
                         </div>
                         <div id="${id}_t" style="flex:1; font-weight:700; color:#b1a100; font-size:15px !important; line-height:50px !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-left:12px; display:none; -webkit-font-smoothing: antialiased;">${shop} Cashback</div>
                         <div id="${id}_x" style="font-size:28px; color:#b1a100; padding-left:10px; line-height:50px !important; display:none;">×</div>
+                        <div id="${id}_mx" style="position:absolute; top:-2px; right:-2px; width:20px; height:20px; background:#e0c200; color:#fff; border-radius:50%; font-size:14px; line-height:18px; text-align:center; display:${isMobile ? 'block' : 'none'}; z-index:10; border:1px solid #fff; font-weight:bold;">×</div>
                     </div>
                     <iframe id="${id}_f" src="${filterUrl}" style="opacity:0; pointer-events:none; transition: opacity 0.3s ease; width:100%; height:calc(100% - ${headerH}); border:none; background:transparent;"></iframe>
                 </div>
@@ -252,8 +267,11 @@
             const frame = document.getElementById(`${id}_f`);
             const label = document.getElementById(`${id}_t`);
             const closeX = document.getElementById(`${id}_x`);
+            const mobX = document.getElementById(`${id}_mx`);
             const favicon = document.getElementById(`${id}_i`);
             const fallback = document.getElementById(`${id}_fallback`);
+
+            setTimeout(() => { if(wrap){ wrap.style.opacity = "1"; wrap.style.pointerEvents = "auto"; } }, 100);
 
             if (!isMobile) { label.style.display = "block"; closeX.style.display = "block"; }
 
@@ -268,9 +286,9 @@
                 frame.style.pointerEvents = "none";
                 setTimeout(() => {
                     if (isMobile) {
-                        label.style.display = "none"; closeX.style.display = "none";
+                        label.style.display = "none"; closeX.style.display = "none"; mobX.style.display = "block";
                         head.style.padding = "0"; head.style.height = "100%";
-                        wrap.style.cssText = `position:fixed !important; z-index:2147483647 !important; ${mobileInitStyle} background:#fffbe7; border:1px solid #e0c200;`;
+                        wrap.style.cssText = `position:fixed !important; z-index:2147483647 !important; ${mobileInitStyle} background:#fffbe7; border:1px solid #e0c200; opacity:1;`;
                     } else {
                         wrap.style.width = "260px"; wrap.style.height = headerH;
                     }
@@ -281,22 +299,23 @@
                 if (wrap && !wrap.contains(e.target) && frame.style.opacity === "1") minimize();
             });
 
+            mobX.onclick = (e) => { e.stopPropagation(); wrap.remove(); };
+
             head.onclick = (e) => {
                 if (e.target.id === `${id}_x`) { wrap.remove(); return; }
                 if (wrap.getAttribute('csp') === '1' && frame.style.opacity === "0") { window.open(filterUrl, '_blank'); return; }
 
                 if (frame.style.opacity === "0") {
                     if (isMobile) {
-                        head.style.padding = "0 14px"; head.style.height = headerH;
-                        wrap.style.cssText += "width:100vw !important; height:calc(100vh - env(safe-area-inset-top, 20px)) !important; top:env(safe-area-inset-top, 20px) !important; bottom:0 !important; right:0 !important; border-radius:0 !important;";
+                        mobX.style.display = "none"; head.style.padding = "0 14px"; head.style.height = headerH;
+                        wrap.style.cssText += "width:100vw !important; height:calc(100vh - env(safe-area-inset-top, 20px)) !important; top:env(safe-area-inset-top, 20px) !important; bottom:0 !important; right:0 !important; border-radius:0 !important; opacity:1;";
                     } else {
                         wrap.style.width = "420px"; wrap.style.height = "450px";
                     }
                     setTimeout(() => {
                         frame.style.opacity = "1";
                         frame.style.pointerEvents = "auto";
-                        label.style.display = "block";
-                        closeX.style.display = "block";
+                        label.style.display = "block"; closeX.style.display = "block";
                     }, 100);
                 } else {
                     if (e.target.id === `${id}_t`) window.open(filterUrl, '_blank');
@@ -306,5 +325,7 @@
         });
     }
 
-    if (location.href.includes(MAIN_DOMAIN)) runLinker(); else runPopup();
+    if (location.href.includes(MAIN_DOMAIN)) {
+        if (ENABLE_LINK_ENRICHER) runLinker();
+    } else { runPopup(); }
 })();
