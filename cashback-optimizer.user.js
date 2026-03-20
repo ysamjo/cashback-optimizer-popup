@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name          Cashback-Optimizer Suite
 // @namespace     http://tampermonkey.net/
-// @version       5.27
-// @description
+// @version       5.28
+// @description   Mobile X-Visibility Fix, Inner Clipper, Precise Matching, Smart-Match Engine.
 // @author        ruler
 // @match         *://*/*
 // @grant         GM_xmlhttpRequest
@@ -35,7 +35,7 @@
     }
 
     // ==========================================
-    // 1. MASTER DATENBANK (v5.27 - FULL RESTORE)
+    // 1. MASTER DATENBANK
     // ==========================================
     const directLinks = {
         "Benefit Buddy": "https://www.benefitbuddy.de/",
@@ -98,9 +98,6 @@
         "Wondercashback": "wondercashback.de", "Shopmate": "shopmate.eu", "mycashbacks": "mycashbacks.com"
     };
 
-    // ==========================================
-    // 2. MODUL: LINK ENRICHER
-    // ==========================================
     function runLinker() {
         if (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
             const filterTerm = new URLSearchParams(window.location.search).get('filter');
@@ -119,7 +116,6 @@
         const enrich = () => {
             document.querySelectorAll('.shop-area-header.filter-tag, .voucher-area-header.filter-tag, .item-name').forEach(el => {
                 if (el.querySelector('a.optimizer-link')) return;
-
                 const bubble = el.querySelector('.discountBanner');
                 if (bubble) {
                     const bubbleAction = bubble.getAttribute('onclick');
@@ -128,7 +124,6 @@
                         return;
                     }
                 }
-
                 let isVoucherSection = false;
                 let prev = el.previousElementSibling;
                 while (prev) {
@@ -138,7 +133,6 @@
                     }
                     prev = prev.previousElementSibling;
                 }
-
                 const text = el.textContent.trim();
                 const isHeader = el.classList.contains('filter-tag');
                 const shopArea = el.closest('.shop-area, .voucher-area');
@@ -148,9 +142,7 @@
                 let url = (isHeader ? findLink(bcLinks, text) : null) || findLink(directLinks, text);
 
                 if (!url) {
-                    if (text === "Newsletter") {
-                        url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+Newsletter`;
-                    }
+                    if (text === "Newsletter") url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+Newsletter`;
                     else if (text === "Corporate Benefits") {
                         const domain = CB_PREFIX ? `${CB_PREFIX}.mitarbeiterangebote.de` : "mitarbeiterangebote.de";
                         url = `https://${domain}/search?s=${encodeURIComponent(searchName)}`;
@@ -176,27 +168,21 @@
                     else if (text === "REWE Kartenwelt") url = `https://kartenwelt.rewe.de/catalogsearch/result/?q=${encodeURIComponent(searchName)}`;
                     else if (text === "Payback") url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+site:payback.de/shop`;
                     else if (findLink(luckyDomains, text)) {
-                        const domain = findLink(luckyDomains, text);
-                        url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+site:${domain}`;
+                        const d = findLink(luckyDomains, text);
+                        url = `https://duckduckgo.com/?q=!ducky+${encodeURIComponent(searchName)}+site:${d}`;
                     }
                 }
-
-                if (!url && isVoucherSection) {
-                    url = `https://${MAIN_DOMAIN}/?filter=${encodeURIComponent(text)}`;
-                }
+                if (!url && isVoucherSection) url = `https://${MAIN_DOMAIN}/?filter=${encodeURIComponent(text)}`;
 
                 if (url) {
-                    const isInternal = url.includes(MAIN_DOMAIN);
-                    el.innerHTML = `<a href="${url}" target="${isInternal ? '_self' : '_blank'}" rel="noreferrer" class="optimizer-link" referrerpolicy="no-referrer" style="color:inherit !important; text-decoration:none !important; border-bottom:1px dotted gray !important;">${el.innerHTML}</a>`;
+                    const isInt = url.includes(MAIN_DOMAIN);
+                    el.innerHTML = `<a href="${url}" target="${isInt ? '_self' : '_blank'}" rel="noreferrer" class="optimizer-link" referrerpolicy="no-referrer" style="color:inherit !important; text-decoration:none !important; border-bottom:1px dotted gray !important;">${el.innerHTML}</a>`;
                 }
             });
         };
         setInterval(enrich, 800);
     }
 
-    // ==========================================
-    // 3. MODUL: POPUP (UI-FIXED)
-    // ==========================================
     function getShopNames() {
         const CACHE_KEY = "names", TIME_KEY = "time", LIFE = 86400000;
         const cached = getStorage(CACHE_KEY), time = getStorage(TIME_KEY) || 0;
@@ -221,7 +207,6 @@
         getShopNames().then(names => {
             const host = location.hostname.toLowerCase();
             let shop = null;
-
             if (host.includes('netto-online.de')) shop = "Netto MD";
             else if (host.includes('baur.de')) shop = "Baur";
             else if (host.includes('g-star.com')) shop = "G-Star RAW";
@@ -234,30 +219,30 @@
                     if (shop) break;
                 }
             }
-
             if (!shop) return;
 
             const id = "cb_" + Math.random().toString(36).substr(2, 5);
             const filterUrl = `https://${MAIN_DOMAIN}/?filter=${encodeURIComponent(shop)}`;
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             const headerH = "50px";
-
             const transition = "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)";
             const desktopInitStyle = `width: 260px; height: ${headerH}; right: 20px; bottom: 20px; border-radius: 14px;`;
             const mobileInitStyle = `width: 56px; height: 56px; right: 20px; bottom: 85px; border-radius: 50%;`;
 
             const html = `
-                <div id="${id}" style="position:fixed !important; z-index:2147483647 !important; opacity:0; pointer-events:none; font-family:-apple-system,BlinkMacSystemFont,sans-serif !important; transition: ${transition}, opacity 0.2s ease; ${isMobile ? mobileInitStyle : desktopInitStyle} overflow:hidden; background:#fffbe7; border:1px solid #e0c200; box-shadow:0 10px 30px rgba(0,0,0,0.2); display:flex; flex-direction:column; backface-visibility: hidden; box-sizing: border-box !important;">
-                    <div id="${id}_h" style="display:flex; align-items:center; justify-content:center; height:${isMobile ? '100%' : headerH}; min-height:${isMobile ? '56px' : headerH}; padding:${isMobile ? '0' : '0 14px'}; cursor:pointer; flex-shrink:0; box-sizing: border-box !important; position:relative;">
-                        <div id="${id}_icowrap" style="width:26px; height:50px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative;">
-                            <img id="${id}_i" src="${ICON_URL}" style="width:26px; height:26px; display:none; z-index:2;">
-                            <span id="${id}_fallback" style="display:block; font-weight:900; color:#b1a100; font-size:14px; z-index:1; line-height:50px;">CO</span>
+                <div id="${id}" style="position:fixed !important; z-index:2147483647 !important; opacity:0; pointer-events:none; font-family:-apple-system,BlinkMacSystemFont,sans-serif !important; transition: ${transition}, opacity 0.2s ease; ${isMobile ? mobileInitStyle : desktopInitStyle} background:transparent; display:flex; flex-direction:column; backface-visibility: hidden; box-sizing: border-box !important; overflow:visible !important;">
+                    <div id="${id}_mx" style="position:absolute; top:-4px; right:-4px; width:22px; height:22px; background:#e0c200; color:#fff; border-radius:50%; font-size:16px; line-height:20px; text-align:center; display:${isMobile ? 'block' : 'none'}; z-index:2147483647; border:1.5px solid #fff; font-weight:bold; cursor:pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">×</div>
+                    <div id="${id}_clipper" style="width:100%; height:100%; overflow:hidden; border-radius:inherit; background:#fffbe7; border:1px solid #e0c200; box-shadow:0 10px 30px rgba(0,0,0,0.2); display:flex; flex-direction:column; position:relative;">
+                        <div id="${id}_h" style="display:flex; align-items:center; justify-content:center; height:${isMobile ? '100%' : headerH}; min-height:${isMobile ? '56px' : headerH}; padding:${isMobile ? '0' : '0 14px'}; cursor:pointer; flex-shrink:0; box-sizing: border-box !important; position:relative;">
+                            <div id="${id}_icowrap" style="width:26px; height:50px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative;">
+                                <img id="${id}_i" src="${ICON_URL}" style="width:26px; height:26px; display:none; z-index:2;">
+                                <span id="${id}_fallback" style="display:block; font-weight:900; color:#b1a100; font-size:14px; z-index:1; line-height:50px;">CO</span>
+                            </div>
+                            <div id="${id}_t" style="flex:1; font-weight:700; color:#b1a100; font-size:15px !important; line-height:50px !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-left:12px; display:none; -webkit-font-smoothing: antialiased;">${shop} Cashback</div>
+                            <div id="${id}_x" style="font-size:28px; color:#b1a100; padding-left:10px; line-height:50px !important; display:none;">×</div>
                         </div>
-                        <div id="${id}_t" style="flex:1; font-weight:700; color:#b1a100; font-size:15px !important; line-height:50px !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-left:12px; display:none; -webkit-font-smoothing: antialiased;">${shop} Cashback</div>
-                        <div id="${id}_x" style="font-size:28px; color:#b1a100; padding-left:10px; line-height:50px !important; display:none;">×</div>
-                        <div id="${id}_mx" style="position:absolute; top:-2px; right:-2px; width:20px; height:20px; background:#e0c200; color:#fff; border-radius:50%; font-size:14px; line-height:18px; text-align:center; display:${isMobile ? 'block' : 'none'}; z-index:10; border:1px solid #fff; font-weight:bold;">×</div>
+                        <iframe id="${id}_f" src="${filterUrl}" style="opacity:0; pointer-events:none; transition: opacity 0.3s ease; width:100%; height:calc(100% - ${headerH}); border:none; background:transparent;"></iframe>
                     </div>
-                    <iframe id="${id}_f" src="${filterUrl}" style="opacity:0; pointer-events:none; transition: opacity 0.3s ease; width:100%; height:calc(100% - ${headerH}); border:none; background:transparent;"></iframe>
                 </div>
             `;
 
@@ -272,7 +257,6 @@
             const fallback = document.getElementById(`${id}_fallback`);
 
             setTimeout(() => { if(wrap){ wrap.style.opacity = "1"; wrap.style.pointerEvents = "auto"; } }, 100);
-
             if (!isMobile) { label.style.display = "block"; closeX.style.display = "block"; }
 
             if (!CSP_SITES.some(s => host.includes(s))) {
@@ -288,7 +272,7 @@
                     if (isMobile) {
                         label.style.display = "none"; closeX.style.display = "none"; mobX.style.display = "block";
                         head.style.padding = "0"; head.style.height = "100%";
-                        wrap.style.cssText = `position:fixed !important; z-index:2147483647 !important; ${mobileInitStyle} background:#fffbe7; border:1px solid #e0c200; opacity:1;`;
+                        wrap.style.cssText = `position:fixed !important; z-index:2147483647 !important; ${mobileInitStyle} background:transparent; opacity:1; overflow:visible !important;`;
                     } else {
                         wrap.style.width = "260px"; wrap.style.height = headerH;
                     }
