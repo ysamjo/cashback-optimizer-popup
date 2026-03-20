@@ -22,7 +22,7 @@
     // ---------------------
 
     const ICON_URL = `https://${MAIN_DOMAIN}/favicons/favicon.svg`;
-    const CSP_SITES = ['rossmann.de', 'lidl.de'];
+    const CSP_SITES = ['rossmann.de', 'lidl.de', 'kartenwelt.rewe.de'];
 
     function setStorage(k,v){ try{GM_setValue(k,v)}catch(e){localStorage.setItem('cb_'+k,v)} }
     function getStorage(k){ try{let r=GM_getValue(k); return r!==undefined?r:localStorage.getItem('cb_'+k)}catch(e){return localStorage.getItem('cb_'+k)} }
