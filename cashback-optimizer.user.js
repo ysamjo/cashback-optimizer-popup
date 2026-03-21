@@ -2,7 +2,7 @@
 // @name          Cashback-Optimizer Suite
 // @namespace     http://tampermonkey.net/
 // @version       5.28
-// @description   Mobile X-Visibility Fix, Inner Clipper, Precise Matching, Smart-Match Engine.
+// @description   Popup für Cashback-Optimizer.de
 // @author        ruler
 // @match         *://*/*
 // @grant         GM_xmlhttpRequest
@@ -202,7 +202,7 @@
     }
 
     function runPopup() {
-        if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.", "kleinanzeigen.de", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de", "amazon.", "netflix.com/watch", "ebay."].some(d => location.href.includes(d))) return;
+        if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.", "kleinanzeigen.de", "copilot.microsoft.com/", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de", "amazon.", "netflix.com/watch", "netflix.com/browse", "ebay.", "kartenwelt.rewe.de"].some(d => location.href.includes(d))) return;
 
         getShopNames().then(names => {
             const host = location.hostname.toLowerCase();
