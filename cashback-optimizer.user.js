@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Cashback-Optimizer Suite
 // @namespace     http://tampermonkey.net/
-// @version       5.28
+// @version       5.29
 // @description   Popup für Cashback-Optimizer.de
 // @author        ruler
 // @match         *://*/*
@@ -69,7 +69,7 @@
         "BestChoice BenefitBuddy": "https://bestchoice-ace-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Birthday & Party": "https://birthday-party-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Style & Beauty": "https://style-beauty-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
-         "BestChoice Home & Office": "https://home-office-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
+        "BestChoice Home & Office": "https://home-office-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Kids & Play": "https://kids-play-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Fit & Healthy": "https://fit-healthy-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Drive & Ride": "https://drive-ride-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
@@ -117,17 +117,23 @@
             }
         }
 
-        const enrich = () => {
-            document.querySelectorAll('.shop-area-header.filter-tag, .voucher-area-header.filter-tag, .item-name').forEach(el => {
-                if (el.querySelector('a.optimizer-link')) return;
-                const bubble = el.querySelector('.discountBanner');
-                if (bubble) {
-                    const bubbleAction = bubble.getAttribute('onclick');
-                    if (bubbleAction) {
-                        el.innerHTML = `<a href="javascript:void(0)" onclick="${bubbleAction}" class="optimizer-link" style="color:inherit !important; text-decoration:none !important; border-bottom:1px dotted gray !important;">${el.innerHTML}</a>`;
-                        return;
-                    }
-                }
+       const enrich = () => {
+    document.querySelectorAll('.shop-area-header.filter-tag, .voucher-area-header.filter-tag, .item-name').forEach(el => {
+        if (el.querySelector('a.optimizer-link')) return;
+
+        // --- PRÜFUNG AUF BESTEHENDES JAVASCRIPT (Prozent-Blase) ---
+        const bubble = el.querySelector('.discountBanner');
+        if (bubble) {
+            const bubbleAction = bubble.getAttribute('onclick');
+            if (bubbleAction) {
+                // 1. Original-Action vom Bubble entfernen (verhindert Doppel-Trigger)
+                bubble.removeAttribute('onclick');
+
+                // 2. Action auf den gesamten Text ausdehnen
+                el.innerHTML = `<a href="javascript:void(0)" onclick="${bubbleAction}" class="optimizer-link" style="color:inherit !important; text-decoration:none !important; border-bottom:1px dotted gray !important;">${el.innerHTML}</a>`;
+                return;
+            }
+        }
                 let isVoucherSection = false;
                 let prev = el.previousElementSibling;
                 while (prev) {
