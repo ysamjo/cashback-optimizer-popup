@@ -234,16 +234,16 @@
             const mobileInitStyle = `width: 56px; height: 56px; right: 20px; bottom: 85px; border-radius: 50%;`;
 
             const html = `
-                <div id="${id}" style="position:fixed !important; z-index:2147483647 !important; opacity:0; pointer-events:none; font-family:-apple-system,BlinkMacSystemFont,sans-serif !important; transition: ${transition}, opacity 0.2s ease; ${isMobile ? mobileInitStyle : desktopInitStyle} background:transparent; display:flex; flex-direction:column; backface-visibility: hidden; box-sizing: border-box !important; overflow:visible !important;">
-                    <div id="${id}_mx" style="position:absolute; top:-4px; right:-4px; width:22px; height:22px; background:#e0c200; color:#fff; border-radius:50%; font-size:16px; line-height:20px; text-align:center; display:${isMobile ? 'block' : 'none'}; z-index:2147483647; border:1.5px solid #fff; font-weight:bold; cursor:pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">×</div>
+                <div id="${id}" style="position:fixed !important; z-index:2147483647 !important; opacity:0; pointer-events:none; font-family:-apple-system,BlinkMacSystemFont,sans-serif !important; transition: ${transition}, opacity 0.2s ease; ${isMobile ? mobileInitStyle : desktopInitStyle} background:transparent; display:flex; flex-direction:column; backface-visibility: hidden; box-sizing: border-box !important; overflow:visible !important; transform: translateZ(0);">
+                    <div id="${id}_mx" style="position:absolute; top:-4px; right:-4px; width:22px; height:22px; background:#e0c200; color:#fff; border-radius:50%; font-size:16px; line-height:22px; text-align:center; display:${isMobile ? 'block' : 'none'}; z-index:2147483647; border:1.5px solid #fff; font-weight:bold; cursor:pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">×</div>
                     <div id="${id}_clipper" style="width:100%; height:100%; overflow:hidden; border-radius:inherit; background:#fffbe7; border:1px solid #e0c200; box-shadow:0 10px 30px rgba(0,0,0,0.2); display:flex; flex-direction:column; position:relative;">
                         <div id="${id}_h" style="display:flex; align-items:center; justify-content:center; height:${isMobile ? '100%' : headerH}; min-height:${isMobile ? '56px' : headerH}; padding:${isMobile ? '0' : '0 14px'}; cursor:pointer; flex-shrink:0; box-sizing: border-box !important; position:relative;">
-                            <div id="${id}_icowrap" style="width:26px; height:50px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative;">
+                            <div id="${id}_icowrap" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative;">
                                 <img id="${id}_i" src="${ICON_URL}" style="width:26px; height:26px; display:none; z-index:2;">
-                                <span id="${id}_fallback" style="display:block; font-weight:900; color:#b1a100; font-size:14px; z-index:1; line-height:50px;">CO</span>
+                                <span id="${id}_fallback" style="display:block; font-weight:900; color:#b1a100; font-size:14px; z-index:1; line-height:26px;">CO</span>
                             </div>
-                            <div id="${id}_t" style="flex:1; font-weight:700; color:#b1a100; font-size:15px !important; line-height:50px !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-left:12px; display:none; -webkit-font-smoothing: antialiased;">${shop} Cashback</div>
-                            <div id="${id}_x" style="font-size:28px; color:#b1a100; padding-left:10px; line-height:50px !important; display:none;">×</div>
+                            <div id="${id}_t" style="flex:1; font-weight:700; color:#b1a100; font-size:15px !important; line-height:normal !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-left:12px; display:none; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;">${shop} Cashback</div>
+                            <div id="${id}_x" style="font-size:28px; color:#b1a100; padding-left:10px; line-height:26px !important; display:none;">×</div>
                         </div>
                         <iframe id="${id}_f" src="${filterUrl}" style="opacity:0; pointer-events:none; transition: opacity 0.3s ease; width:100%; height:calc(100% - ${headerH}); border:none; background:transparent;"></iframe>
                     </div>
