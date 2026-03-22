@@ -215,6 +215,7 @@
             else if (host.includes('baur.de')) shop = "Baur";
             else if (host.includes('g-star.com')) shop = "G-Star RAW";
             else if (host.includes('otto.de')) shop = "Otto";
+            else if (host.includes('store.steampowered.com')) shop = "Steam";
 
             if (!shop && names.length > 0) {
                 const segs = host.split('.').filter(s => !['www','de','com','net','shop','online','at','ch'].includes(s));
