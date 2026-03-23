@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name          Cashback-Optimizer Suite
 // @namespace     http://tampermonkey.net/
-// @version       5.29
-// @description   Popup für Cashback-Optimizer.de
+// @version       5.33
+// @description   Popup für Cashback-Optimizer.de mit Link-Enricher
 // @author        ruler
 // @match         *://*/*
 // @grant         GM_xmlhttpRequest
 // @grant         GM_setValue
 // @grant         GM_getValue
+// @connect       cashback-optimizer.de
 // @run-at        document-end
 // @allFrames     true
 // ==/UserScript==
@@ -19,6 +20,14 @@
     const ENABLE_LINK_ENRICHER = true;
     const CB_PREFIX = "";
     const MAIN_DOMAIN = "cashback-optimizer.de";
+
+    // Domains, auf denen das Popup NICHT erscheinen soll
+    const EXCLUDED_DOMAINS = [
+        "google.", "bing.", "duckduckgo.", "kleinanzeigen.de",
+        "copilot.microsoft.com/", "mydealz.de", "pepper.pl",
+        "preisvergleich.", "idealo.", "brickmerge.de", "amazon.",
+        "netflix.com/watch", "netflix.com/browse", "ebay.", "kartenwelt.rewe.de"
+    ];
     // ---------------------
 
     const ICON_URL = `https://${MAIN_DOMAIN}/favicons/favicon.svg`;
@@ -81,14 +90,14 @@
         "BestChoice Sport & Hobby": "https://sport-hobby-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Streaming & Entertainment": "https://streaming-entertainment-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "Wunschgutschein": "https://www.wunschgutschein.de/pages/beliebtesten-einloesepartner",
-        "Wunschgutschein Beauty": "https://app.wunschgutschein.de/beauty#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
-        "Wunschgutschein Home & Living": "https://app.wunschgutschein.de/homeandliving#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
-        "Wunschgutschein Fashion": "https://app.wunschgutschein.de/fashion#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
-        "Wunschgutschein Shopping": "https://app.wunschgutschein.de/shopping#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
-        "Wunschgutschein Sport": "https://app.wunschgutschein.de/sport#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
-        "Wunschgutschein Mobilität": "https://app.wunschgutschein.de/mobilitaet#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
-        "Wunschgutschein Kids & Fun": "https://app.wunschgutschein.de/kids#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
-        "Wunschgutschein Tanken": "https://app.wunschgutschein.de/tanken#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Beauty": "https://app.wunschgutschein.de/beauty",
+        "Wunschgutschein Home & Living": "https://app.wunschgutschein.de/homeandliving",
+        "Wunschgutschein Fashion": "https://app.wunschgutschein.de/fashion",
+        "Wunschgutschein Shopping": "https://app.wunschgutschein.de/shopping",
+        "Wunschgutschein Sport": "https://app.wunschgutschein.de/sport",
+        "Wunschgutschein Mobilität": "https://app.wunschgutschein.de/mobilitaet",
+        "Wunschgutschein Kids & Fun": "https://app.wunschgutschein.de/kids",
+        "Wunschgutschein Tanken": "https://app.wunschgutschein.de/tanken",
         "Gutscheingold": "https://www.gutscheingold.de/grusskarten/#einloesepartner",
         "Gutscheingold Beauty": "https://www.gutscheingold.de/beauty/#einloesepartner",
         "Gutscheingold Kids": "https://www.gutscheingold.de/kids/#einloesepartner",
@@ -117,23 +126,31 @@
             }
         }
 
-       const enrich = () => {
-    document.querySelectorAll('.shop-area-header.filter-tag, .voucher-area-header.filter-tag, .item-name').forEach(el => {
-        if (el.querySelector('a.optimizer-link')) return;
+        const enrich = () => {
+            document.querySelectorAll('.shop-area-header.filter-tag, .voucher-area-header.filter-tag, .item-name').forEach(el => {
+                if (el.querySelector('a.optimizer-link')) return;
 
-        // --- PRÜFUNG AUF BESTEHENDES JAVASCRIPT (Prozent-Blase) ---
-        const bubble = el.querySelector('.discountBanner');
-        if (bubble) {
-            const bubbleAction = bubble.getAttribute('onclick');
-            if (bubbleAction) {
-                // 1. Original-Action vom Bubble entfernen (verhindert Doppel-Trigger)
-                bubble.removeAttribute('onclick');
+                const bubble = el.querySelector('.discountBanner');
+                if (bubble && (bubble.hasAttribute('onclick') || bubble.onclick)) {
+                    const bubbleAction = bubble.getAttribute('onclick');
+                    bubble.removeAttribute('onclick');
 
-                // 2. Action auf den gesamten Text ausdehnen
-                el.innerHTML = `<a href="javascript:void(0)" onclick="${bubbleAction}" class="optimizer-link" style="color:inherit !important; text-decoration:none !important; border-bottom:1px dotted gray !important;">${el.innerHTML}</a>`;
-                return;
-            }
-        }
+                    const content = el.innerHTML;
+                    el.innerHTML = `<a href="#" class="optimizer-link" style="color:inherit !important; text-decoration:none !important; border-bottom:1px dotted gray !important; cursor:pointer;">${content}</a>`;
+
+                    const newLink = el.querySelector('.optimizer-link');
+                    newLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        try {
+                            (window.unsafeWindow || window).eval(bubbleAction);
+                        } catch(err) {
+                            new Function(bubbleAction).call(window);
+                        }
+                    });
+                    return;
+                }
+
                 let isVoucherSection = false;
                 let prev = el.previousElementSibling;
                 while (prev) {
@@ -212,10 +229,10 @@
     }
 
     function runPopup() {
-        if (window.top !== window.self || [MAIN_DOMAIN, "google.", "bing.", "duckduckgo.", "kleinanzeigen.de", "copilot.microsoft.com/", "mydealz.de", "pepper.pl", "preisvergleich.", "idealo.", "brickmerge.de", "amazon.", "netflix.com/watch", "netflix.com/browse", "ebay.", "kartenwelt.rewe.de"].some(d => location.href.includes(d))) return;
+        const host = location.hostname.toLowerCase();
+        if (window.top !== window.self || EXCLUDED_DOMAINS.some(d => location.href.includes(d))) return;
 
         getShopNames().then(names => {
-            const host = location.hostname.toLowerCase();
             let shop = null;
             if (host.includes('netto-online.de')) shop = "Netto MD";
             else if (host.includes('baur.de')) shop = "Baur";
@@ -240,9 +257,10 @@
             const desktopInitStyle = `width: 260px; height: ${headerH}; right: 20px; bottom: 20px; border-radius: 14px;`;
             const mobileInitStyle = `width: 56px; height: 56px; right: 20px; bottom: 85px; border-radius: 50%;`;
 
+            // HTML: id_x nutzt jetzt Flexbox zur vertikalen und horizontalen Zentrierung, Padding minimal korrigiert
             const html = `
                 <div id="${id}" style="position:fixed !important; z-index:2147483647 !important; opacity:0; pointer-events:none; font-family:-apple-system,BlinkMacSystemFont,sans-serif !important; transition: ${transition}, opacity 0.2s ease; ${isMobile ? mobileInitStyle : desktopInitStyle} background:transparent; display:flex; flex-direction:column; backface-visibility: hidden; box-sizing: border-box !important; overflow:visible !important;">
-                    <div id="${id}_mx" style="position:absolute; top:-4px; right:-4px; width:22px; height:22px; background:#e0c200; color:#fff; border-radius:50%; font-size:16px; line-height:20px; text-align:center; display:${isMobile ? 'block' : 'none'}; z-index:2147483647; border:1.5px solid #fff; font-weight:bold; cursor:pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">×</div>
+                    <div id="${id}_mx" style="position:absolute; top:-4px; right:-4px; width:22px; height:22px; background:#e0c200; color:#fff; border-radius:50%; font-size:16px; display:${isMobile ? 'flex' : 'none'}; align-items:center; justify-content:center; padding-bottom:2px; box-sizing:border-box; z-index:2147483647; border:1.5px solid #fff; font-weight:bold; cursor:pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">×</div>
                     <div id="${id}_clipper" style="width:100%; height:100%; overflow:hidden; border-radius:inherit; background:#fffbe7; border:1px solid #e0c200; box-shadow:0 10px 30px rgba(0,0,0,0.2); display:flex; flex-direction:column; position:relative;">
                         <div id="${id}_h" style="display:flex; align-items:center; justify-content:center; height:${isMobile ? '100%' : headerH}; min-height:${isMobile ? '56px' : headerH}; padding:${isMobile ? '0' : '0 14px'}; cursor:pointer; flex-shrink:0; box-sizing: border-box !important; position:relative;">
                             <div id="${id}_icowrap" style="width:26px; height:50px; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative;">
@@ -250,7 +268,7 @@
                                 <span id="${id}_fallback" style="display:block; font-weight:900; color:#b1a100; font-size:14px; z-index:1; line-height:50px;">CO</span>
                             </div>
                             <div id="${id}_t" style="flex:1; font-weight:700; color:#b1a100; font-size:15px !important; line-height:50px !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-left:12px; display:none; -webkit-font-smoothing: antialiased;">${shop} Cashback</div>
-                            <div id="${id}_x" style="font-size:28px; color:#b1a100; padding-left:10px; line-height:50px !important; display:none;">×</div>
+                            <div id="${id}_x" style="font-size:28px; color:#b1a100; padding-left:10px; display:none; align-items:center; justify-content:center; padding-bottom:4px; line-height:1;">×</div>
                         </div>
                         <iframe id="${id}_f" src="${filterUrl}" style="opacity:0; pointer-events:none; transition: opacity 0.3s ease; width:100%; height:calc(100% - ${headerH}); border:none; background:transparent;"></iframe>
                     </div>
@@ -268,7 +286,7 @@
             const fallback = document.getElementById(`${id}_fallback`);
 
             setTimeout(() => { if(wrap){ wrap.style.opacity = "1"; wrap.style.pointerEvents = "auto"; } }, 100);
-            if (!isMobile) { label.style.display = "block"; closeX.style.display = "block"; }
+            if (!isMobile) { label.style.display = "block"; closeX.style.display = "flex"; } // hier auf flex geändert
 
             if (!CSP_SITES.some(s => host.includes(s))) {
                 favicon.onload = () => { favicon.style.display = 'block'; fallback.style.display = 'none'; };
@@ -281,7 +299,7 @@
                 frame.style.pointerEvents = "none";
                 setTimeout(() => {
                     if (isMobile) {
-                        label.style.display = "none"; closeX.style.display = "none"; mobX.style.display = "block";
+                        label.style.display = "none"; closeX.style.display = "none"; mobX.style.display = "flex";
                         head.style.padding = "0"; head.style.height = "100%";
                         wrap.style.cssText = `position:fixed !important; z-index:2147483647 !important; ${mobileInitStyle} background:transparent; opacity:1; overflow:visible !important;`;
                     } else {
@@ -310,7 +328,7 @@
                     setTimeout(() => {
                         frame.style.opacity = "1";
                         frame.style.pointerEvents = "auto";
-                        label.style.display = "block"; closeX.style.display = "block";
+                        label.style.display = "block"; closeX.style.display = "flex"; // hier auf flex geändert
                     }, 100);
                 } else {
                     if (e.target.id === `${id}_t`) window.open(filterUrl, '_blank');
@@ -320,7 +338,12 @@
         });
     }
 
-    if (location.href.includes(MAIN_DOMAIN)) {
+    // --- ENTSCHEIDUNG: Link-Enricher ODER Popup ---
+    const isMainSite = location.href.includes(MAIN_DOMAIN) || location.href.includes("kolateeprojects.gitlab.io/cashback_optimizer");
+
+    if (isMainSite) {
         if (ENABLE_LINK_ENRICHER) runLinker();
-    } else { runPopup(); }
+    } else {
+        runPopup();
+    }
 })();
