@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Cashback-Optimizer Suite
 // @namespace     http://tampermonkey.net/
-// @version       5.33
+// @version       5.4
 // @description   Popup für Cashback-Optimizer.de mit Link-Enricher
 // @author        ruler
 // @match         *://*/*
@@ -9,6 +9,8 @@
 // @grant         GM_setValue
 // @grant         GM_getValue
 // @connect       cashback-optimizer.de
+// @updateURL     https://raw.githubusercontent.com/ysamjo/cashback-optimizer-popup/main/cashback-optimizer.user.js
+// @downloadURL   https://raw.githubusercontent.com/ysamjo/cashback-optimizer-popup/main/cashback-optimizer.user.js
 // @run-at        document-end
 // @allFrames     true
 // ==/UserScript==
@@ -18,7 +20,7 @@
 
     // --- KONFIGURATION ---
     const ENABLE_LINK_ENRICHER = true;
-    const CB_PREFIX = "";
+    const CB_PREFIX = "samsung"; //Hier Subdomain des Arbeitgers rein
     const MAIN_DOMAIN = "cashback-optimizer.de";
 
     // Domains, auf denen das Popup NICHT erscheinen soll
@@ -31,7 +33,8 @@
     // ---------------------
 
     const ICON_URL = `https://${MAIN_DOMAIN}/favicons/favicon.svg`;
-    const CSP_SITES = ['rossmann.de', 'lidl.de', 'kartenwelt.rewe.de'];
+    // Hardcoded Fallbacks für extrem restriktive Seiten
+    const CSP_SITES = ['rossmann.de', 'lidl.de', 'eon.de'];
 
     function setStorage(k,v){ try{GM_setValue(k,v)}catch(e){localStorage.setItem('cb_'+k,v)} }
     function getStorage(k){ try{let r=GM_getValue(k); return r!==undefined?r:localStorage.getItem('cb_'+k)}catch(e){return localStorage.getItem('cb_'+k)} }
@@ -90,14 +93,14 @@
         "BestChoice Sport & Hobby": "https://sport-hobby-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "BestChoice Streaming & Entertainment": "https://streaming-entertainment-catalog.cadooz.com/frontend/cat/view.do?view=custom_view&lt=default&sortBy=alpha&ptg=vou",
         "Wunschgutschein": "https://www.wunschgutschein.de/pages/beliebtesten-einloesepartner",
-        "Wunschgutschein Beauty": "https://app.wunschgutschein.de/beauty",
-        "Wunschgutschein Home & Living": "https://app.wunschgutschein.de/homeandliving",
-        "Wunschgutschein Fashion": "https://app.wunschgutschein.de/fashion",
-        "Wunschgutschein Shopping": "https://app.wunschgutschein.de/shopping",
-        "Wunschgutschein Sport": "https://app.wunschgutschein.de/sport",
-        "Wunschgutschein Mobilität": "https://app.wunschgutschein.de/mobilitaet",
-        "Wunschgutschein Kids & Fun": "https://app.wunschgutschein.de/kids",
-        "Wunschgutschein Tanken": "https://app.wunschgutschein.de/tanken",
+        "Wunschgutschein Beauty": "https://app.wunschgutschein.de/beauty#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Home & Living": "https://app.wunschgutschein.de/homeandliving#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Fashion": "https://app.wunschgutschein.de/fashion#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Shopping": "https://app.wunschgutschein.de/shopping#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Sport": "https://app.wunschgutschein.de/sport#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Mobilität": "https://app.wunschgutschein.de/mobilitaet#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Kids & Fun": "https://app.wunschgutschein.de/kids#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
+        "Wunschgutschein Tanken": "https://app.wunschgutschein.de/tanken#:~:text=GUTSCHEIN%20EINL%C3%96SEN-,Top%20Auswahl,-%E2%80%B9",
         "Gutscheingold": "https://www.gutscheingold.de/grusskarten/#einloesepartner",
         "Gutscheingold Beauty": "https://www.gutscheingold.de/beauty/#einloesepartner",
         "Gutscheingold Kids": "https://www.gutscheingold.de/kids/#einloesepartner",
@@ -257,7 +260,27 @@
             const desktopInitStyle = `width: 260px; height: ${headerH}; right: 20px; bottom: 20px; border-radius: 14px;`;
             const mobileInitStyle = `width: 56px; height: 56px; right: 20px; bottom: 85px; border-radius: 50%;`;
 
-            // HTML: id_x nutzt jetzt Flexbox zur vertikalen und horizontalen Zentrierung, Padding minimal korrigiert
+            // Hilfsfunktion: Setzt das Skript in den "CSP Mode" (direkter Link statt iFrame) und blendet den Pfeil ein
+            const setCspMode = () => {
+                const wrapObj = document.getElementById(id);
+                const linkIcon = document.getElementById(`${id}_link_icon`);
+                if (wrapObj) wrapObj.setAttribute('csp', '1');
+                if (linkIcon) linkIcon.style.display = 'block';
+            };
+
+            document.addEventListener("securitypolicyviolation", (e) => {
+                if (e.blockedURI && e.blockedURI.includes(MAIN_DOMAIN)) {
+                    setCspMode();
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const wrapObj = document.getElementById(id);
+                    if (wrapObj) wrapObj.remove();
+                }
+            });
+
             const html = `
                 <div id="${id}" style="position:fixed !important; z-index:2147483647 !important; opacity:0; pointer-events:none; font-family:-apple-system,BlinkMacSystemFont,sans-serif !important; transition: ${transition}, opacity 0.2s ease; ${isMobile ? mobileInitStyle : desktopInitStyle} background:transparent; display:flex; flex-direction:column; backface-visibility: hidden; box-sizing: border-box !important; overflow:visible !important;">
                     <div id="${id}_mx" style="position:absolute; top:-4px; right:-4px; width:22px; height:22px; background:#e0c200; color:#fff; border-radius:50%; font-size:16px; display:${isMobile ? 'flex' : 'none'}; align-items:center; justify-content:center; padding-bottom:2px; box-sizing:border-box; z-index:2147483647; border:1.5px solid #fff; font-weight:bold; cursor:pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">×</div>
@@ -267,7 +290,10 @@
                                 <img id="${id}_i" src="${ICON_URL}" style="width:26px; height:26px; display:none; z-index:2;">
                                 <span id="${id}_fallback" style="display:block; font-weight:900; color:#b1a100; font-size:14px; z-index:1; line-height:50px;">CO</span>
                             </div>
-                            <div id="${id}_t" style="flex:1; font-weight:700; color:#b1a100; font-size:15px !important; line-height:50px !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-left:12px; display:none; -webkit-font-smoothing: antialiased;">${shop} Cashback</div>
+                            <div id="${id}_t" style="flex:1; font-weight:700; color:#b1a100; font-size:15px !important; line-height:50px !important; margin-left:12px; display:none; align-items:center; min-width:0; -webkit-font-smoothing: antialiased;">
+                                <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${shop} Cashback</div>
+                                <div id="${id}_link_icon" style="display:none; margin-left:5px; font-weight:bold; font-size:16px; flex-shrink:0;">↗</div>
+                            </div>
                             <div id="${id}_x" style="font-size:28px; color:#b1a100; padding-left:10px; display:none; align-items:center; justify-content:center; padding-bottom:4px; line-height:1;">×</div>
                         </div>
                         <iframe id="${id}_f" src="${filterUrl}" style="opacity:0; pointer-events:none; transition: opacity 0.3s ease; width:100%; height:calc(100% - ${headerH}); border:none; background:transparent;"></iframe>
@@ -275,7 +301,8 @@
                 </div>
             `;
 
-            document.body.insertAdjacentHTML('beforeend', html);
+            document.documentElement.insertAdjacentHTML('beforeend', html);
+
             const wrap = document.getElementById(id);
             const head = document.getElementById(`${id}_h`);
             const frame = document.getElementById(`${id}_f`);
@@ -286,13 +313,15 @@
             const fallback = document.getElementById(`${id}_fallback`);
 
             setTimeout(() => { if(wrap){ wrap.style.opacity = "1"; wrap.style.pointerEvents = "auto"; } }, 100);
-            if (!isMobile) { label.style.display = "block"; closeX.style.display = "flex"; } // hier auf flex geändert
+            if (!isMobile) { label.style.display = "flex"; closeX.style.display = "flex"; }
 
-            if (!CSP_SITES.some(s => host.includes(s))) {
-                favicon.onload = () => { favicon.style.display = 'block'; fallback.style.display = 'none'; };
-                favicon.onerror = () => { favicon.style.display = 'none'; fallback.style.display = 'block'; wrap.setAttribute('csp','1'); };
-                favicon.src = ICON_URL;
-            } else { wrap.setAttribute('csp', '1'); }
+            favicon.onload = () => { favicon.style.display = 'block'; fallback.style.display = 'none'; };
+            favicon.onerror = () => { favicon.style.display = 'none'; fallback.style.display = 'block'; setCspMode(); };
+            favicon.src = ICON_URL;
+
+            if (CSP_SITES.some(s => host.includes(s))) {
+                setCspMode();
+            }
 
             const minimize = () => {
                 frame.style.opacity = "0";
@@ -316,7 +345,11 @@
 
             head.onclick = (e) => {
                 if (e.target.id === `${id}_x`) { wrap.remove(); return; }
-                if (wrap.getAttribute('csp') === '1' && frame.style.opacity === "0") { window.open(filterUrl, '_blank'); return; }
+
+                if (wrap.getAttribute('csp') === '1' && frame.style.opacity === "0") {
+                    window.open(filterUrl, '_blank');
+                    return;
+                }
 
                 if (frame.style.opacity === "0") {
                     if (isMobile) {
@@ -328,10 +361,10 @@
                     setTimeout(() => {
                         frame.style.opacity = "1";
                         frame.style.pointerEvents = "auto";
-                        label.style.display = "block"; closeX.style.display = "flex"; // hier auf flex geändert
+                        label.style.display = "flex"; closeX.style.display = "flex";
                     }, 100);
                 } else {
-                    if (e.target.id === `${id}_t`) window.open(filterUrl, '_blank');
+                    if (e.target.id === `${id}_t` || e.target.closest(`#${id}_t`)) window.open(filterUrl, '_blank');
                     else minimize();
                 }
             };
