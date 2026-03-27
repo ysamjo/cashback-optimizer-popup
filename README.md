@@ -10,7 +10,9 @@ Ein kompaktes Userscript, das dir automatisch anzeigt, ob es für den aktuellen 
 - 📱 **Mobile Optimized:** Spezielle UI-Anpassungen für iPhone/Android.
 
 ## Installation
-1. Desktop: Installiere die Browser-Erweiterung [**Tampermonkey**](https://www.tampermonkey.net/). iOS: Installiere die [**Userscripts App**](https://apps.apple.com/us/app/userscripts/id1463298887).
+1.
+   - Desktop: Installiere die Browser-Erweiterung [**Tampermonkey**](https://www.tampermonkey.net/).
+   - iOS: Installiere die [**Userscripts App**](https://apps.apple.com/us/app/userscripts/id1463298887).
 2. Klicke auf den folgenden Link: [👉 JETZT INSTALLIEREN](https://github.com/ysamjo/cashback-optimizer-popup/raw/refs/heads/main/cashback-optimizer.user.js)
 3. Bestätige die Installation in deinem Browser.
 
