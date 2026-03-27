@@ -13,6 +13,7 @@ Ein kompaktes Userscript, das dir automatisch anzeigt, ob es für den aktuellen 
 1. Desktop: Installiere die Browser-Erweiterung [**Tampermonkey**](https://www.tampermonkey.net/).
 2. Klicke auf den folgenden Link: [👉 JETZT INSTALLIEREN](https://github.com/ysamjo/cashback-optimizer-popup/raw/refs/heads/main/cashback-optimizer.user.js)
 3. Bestätige die Installation in deinem Browser.
+4. Bei der ersten Nutzung die Domain Cashback-Optimizer.de [freigeben](https://www.mydealz.de/diskussion/aktuelle-sparmoglichkeiten-in-den-beliebtesten-shops-guthabenkarten-rabatt-portale-cashback-2116543#reply-57230776).
 
 Für iOS gibt es die [**Userscripts App**](https://apps.apple.com/us/app/userscripts/id1463298887) als Alternative zu Tampermonkey. 
 
