@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Cashback-Optimizer Suite
 // @namespace     http://tampermonkey.net/
-// @version       5.7
+// @version       5.8
 // @description   Popup für unterstützte Seiten, dass die Cashback-Möglichkeiten anzeigt.
 // @author        ruler
 // @match         *://*/*
@@ -31,7 +31,8 @@
     "bing.", "duckduckgo.", "kleinanzeigen.de",
     "copilot.microsoft.com/", "mydealz.de", "pepper.pl",
     "preisvergleich.", "idealo.", "brickmerge.de", "amazon.",
-    "netflix.com/watch", "netflix.com/browse", "ebay.", "kartenwelt.rewe.de"
+    "netflix.com/watch", "netflix.com/browse", "ebay.", "kartenwelt.rewe.de",
+    "kartenwelt.penny.de"
   ];
 
   const ICON_URL = `https://${MAIN_DOMAIN}/favicons/favicon.svg`;
@@ -477,11 +478,11 @@
                 <img id="${id}_i" src="${ICON_URL}" style="width:26px; height:26px; display:none;">
                 <span id="${id}_fallback" style="display:block; width:26px; height:26px; font-weight:900; color:#b1a100; font-size:14px; line-height:26px; text-align:center;">CO</span>
               </div>
-              <div id="${id}_t" style="flex:1; height:${headerH}; font-weight:700; color:#b1a100; font-size:15px !important; margin-left:12px; display:flex; visibility:hidden; pointer-events:none; align-items:center; min-width:0; -webkit-font-smoothing:antialiased;">
+              <div id="${id}_t" style="flex:1; height:${headerH}; font-weight:700; color:#b1a100; font-size:15px !important; margin-left:12px; display:none; pointer-events:none; align-items:center; min-width:0; -webkit-font-smoothing:antialiased;">
                 <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2;">${safeShop} Cashback</div>
                 <div id="${id}_link_icon" style="display:none; margin-left:5px; font-weight:bold; font-size:16px; flex-shrink:0; line-height:1;">↗</div>
               </div>
-              <div id="${id}_x" style="width:32px; height:32px; margin-left:8px; display:flex; visibility:hidden; pointer-events:none; align-items:center; justify-content:center; flex-shrink:0; font-size:28px; line-height:1; color:#b1a100; padding:0;">×</div>
+              <div id="${id}_x" style="width:32px; height:32px; margin-left:8px; display:none; pointer-events:none; align-items:center; justify-content:center; flex-shrink:0; font-size:28px; line-height:1; color:#b1a100; padding:0;">×</div>
             </div>
             <iframe id="${id}_f" loading="eager" src="about:blank" data-src="${filterUrl}" style="opacity:0; pointer-events:none; transition:opacity 0.3s ease; width:100%; height:calc(100% - ${headerH}); border:none; background:transparent;"></iframe>
           </div>
@@ -572,8 +573,10 @@
           frame.style.opacity = "0";
           frame.style.pointerEvents = "none";
           setTimeout(() => {
+            label.style.display = "none";
             label.style.visibility = "hidden";
             label.style.pointerEvents = "none";
+            closeX.style.display = "none";
             closeX.style.visibility = "hidden";
             closeX.style.pointerEvents = "none";
             if (mobX) mobX.style.display = "flex";
@@ -623,8 +626,10 @@
             setTimeout(() => {
               frame.style.opacity = "1";
               frame.style.pointerEvents = "auto";
+              label.style.display = "flex";
               label.style.visibility = "visible";
               label.style.pointerEvents = "auto";
+              closeX.style.display = "flex";
               closeX.style.visibility = "visible";
               closeX.style.pointerEvents = "auto";
             }, 100);
