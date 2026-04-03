@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Cashback-Optimizer Suite
 // @namespace     http://tampermonkey.net/
-// @version       5.8
+// @version       5.10
 // @description   Popup für unterstützte Seiten, dass die Cashback-Möglichkeiten anzeigt.
 // @author        ruler
 // @match         *://*/*
@@ -393,7 +393,8 @@
       'baur.de': 'Baur',
       'g-star.com': 'G-Star RAW',
       'otto.de': 'Otto',
-      'store.steampowered.com': 'Steam'
+      'store.steampowered.com': 'Steam',
+      'booking.com': 'Booking.com'
     };
 
     const findShopByHost = (names) => {
@@ -458,7 +459,7 @@
                 <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2;">${safeShop} Cashback</div>
                 <div id="${id}_link_icon" style="display:none; margin-left:5px; font-weight:bold; font-size:16px; flex-shrink:0; line-height:1;">↗</div>
               </div>
-              <div id="${id}_x" style="width:32px; height:32px; margin-left:8px; display:flex; visibility:visible; pointer-events:auto; align-items:center; justify-content:center; flex-shrink:0; font-size:28px; line-height:1; color:#b1a100; padding:0;">×</div>
+              <div id="${id}_x" style="width:32px; height:32px; margin-left:8px; display:flex; visibility:visible; pointer-events:auto; align-items:center; justify-content:center; flex-shrink:0; font-size:28px; line-height:1; color:#b1a100; padding:0 0 3px 0;">×</div>
             </div>
           </div>
           <div id="${id}_contentWrap" style="width:100%; height:0; opacity:0; overflow:hidden; transition:height 0.3s ease, opacity 0.2s ease; margin-top:8px;">
@@ -471,7 +472,7 @@
 
       const mobileHtml = `
         <div id="${id}" style="position:fixed !important; z-index:2147483647 !important; opacity:0; pointer-events:none; font-family:-apple-system,BlinkMacSystemFont,sans-serif !important; transition:${transition}; ${mobileInitStyle} background:transparent; display:flex; flex-direction:column; box-sizing:border-box !important; overflow:visible !important;">
-          <div id="${id}_mx" style="position:absolute; top:-4px; right:-4px; width:22px; height:22px; background:#e0c200; color:#fff; border-radius:50%; font-size:16px; display:flex; align-items:center; justify-content:center; box-sizing:border-box; z-index:2147483647; border:1.5px solid #fff; font-weight:bold; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.3); line-height:22px;">×</div>
+          <div id="${id}_mx" style="position:absolute; top:-4px; right:-4px; width:22px; height:22px; background:#e0c200; color:#fff; border-radius:50%; font-size:16px; display:flex; align-items:center; justify-content:center; box-sizing:border-box; z-index:2147483647; border:1.5px solid #fff; font-weight:bold; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.3); line-height:22px; padding-bottom:2px;">×</div>
           <div id="${id}_clipper" style="width:100%; height:100%; overflow:hidden; border-radius:inherit; background:#fffbe7; border:1px solid #e0c200; box-shadow:0 10px 30px rgba(0,0,0,0.2); display:flex; flex-direction:column; position:relative;">
             <div id="${id}_h" style="display:flex; align-items:center; justify-content:center; height:100%; min-height:56px; padding:0; cursor:pointer; flex-shrink:0; box-sizing:border-box !important; position:relative;">
               <div id="${id}_icowrap" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -482,7 +483,7 @@
                 <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2;">${safeShop} Cashback</div>
                 <div id="${id}_link_icon" style="display:none; margin-left:5px; font-weight:bold; font-size:16px; flex-shrink:0; line-height:1;">↗</div>
               </div>
-              <div id="${id}_x" style="width:32px; height:32px; margin-left:8px; display:none; pointer-events:none; align-items:center; justify-content:center; flex-shrink:0; font-size:28px; line-height:1; color:#b1a100; padding:0;">×</div>
+              <div id="${id}_x" style="width:32px; height:32px; margin-left:8px; display:none; pointer-events:none; align-items:center; justify-content:center; flex-shrink:0; font-size:28px; line-height:1; color:#b1a100; padding:0 0 3px 0;">×</div>
             </div>
             <iframe id="${id}_f" loading="eager" src="about:blank" data-src="${filterUrl}" style="opacity:0; pointer-events:none; transition:opacity 0.3s ease; width:100%; height:calc(100% - ${headerH}); border:none; background:transparent;"></iframe>
           </div>
