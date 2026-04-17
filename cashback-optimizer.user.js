@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Cashback-Optimizer Suite
 // @namespace     http://tampermonkey.net/
-// @version       5.10
+// @version       5.12
 // @description   Popup für unterstützte Seiten, dass die Cashback-Möglichkeiten anzeigt.
 // @author        ruler
 // @match         *://*/*
@@ -261,7 +261,18 @@
       "Payback": (searchName) => `https://duckduckgo.com/?q=!ducky+${enc(searchName)}+site:payback.de/shop`,
     };
 
-    const buildUrl = (text, searchName, isVoucherSection) => {
+    const buildUrl = (text, searchName, isVoucherSection, isItem) => {
+      const lowerText = text.toLowerCase();
+
+      // NEU: Bestchoice ergänzt und Filter-Term für "Gutscheingold Grußkarten" angepasst
+      if (isItem && (lowerText.includes("wunschgutschein") || lowerText.includes("gutscheingold") || lowerText.includes("bestchoice"))) {
+        let filterTerm = text;
+        if (lowerText.includes("gutscheingold") && (lowerText.includes("grußkarten") || lowerText.includes("grusskarten"))) {
+          filterTerm = "Gutscheingold";
+        }
+        return `https://${MAIN_DOMAIN}/?filter=${enc(filterTerm)}`;
+      }
+
       let url = findLinkInMap(bcLinksMap, text) || findLinkInMap(directLinksMap, text);
       if (url) return url;
 
@@ -304,13 +315,14 @@
             return;
           }
 
+          const isItem = el.classList.contains('item-name');
           const text = el.textContent.trim();
           const shopArea = el.closest('.shop-area, .voucher-area');
           const rawName = shopArea?.querySelector('.filter-tag')?.textContent.replace(/<.*%/, '').trim() || "";
           const searchName = (rawName === "Netto MD") ? "Netto" : rawName;
 
           const isVoucherSection = getIsVoucherSection(el);
-          const url = buildUrl(text, searchName, isVoucherSection);
+          const url = buildUrl(text, searchName, isVoucherSection, isItem);
 
           if (url) {
             const isInternal = url.includes(MAIN_DOMAIN);
